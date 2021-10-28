@@ -1653,8 +1653,6 @@ token = os.environ['token']
 token1 = os.environ['token1']
                             
 
-#token bot test
-token1 = "ODUwMzI0NDMzNTc1MDg0MDQy.YLoEVw.AGAt3EROOxb9KLqhpVsS7HtVIzA"
 
 bot.run(token1)
 
