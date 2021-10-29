@@ -5,7 +5,6 @@ from random import *
 from csv import *
 from discord.utils import get
 from csv import *
-from PIL import Image
 
 client = Client()
 
@@ -21,7 +20,7 @@ bot.remove_command('help')
 @bot.event
 async def on_ready():
     print("Ready !")
-    activity = Game(name=";help", type=1)
+    activity = Game(name="$help", type=1)
     await bot.change_presence(status=Status.online, activity=activity)
 
 
@@ -83,12 +82,11 @@ async def roles(ctx):
 # message de bienvenue
 @bot.event
 async def on_member_join(member):
-    serveur = member.guild
-    Nombre_de_personnes = serveur.member_count
-    salons = member.guild.text_channels
-    roles = member.guild.roles
-
     try :
+        serveur = member.guild
+        Nombre_de_personnes = serveur.member_count
+        salons = member.guild.text_channels
+        roles = member.guild.roles
         for role in roles :
             if role.name == "membre" or role.name == "Membre" :
                 role_membre = role
@@ -98,27 +96,28 @@ async def on_member_join(member):
             if salon.name == "bienvenue":
                 channel = salon
         embed = Embed(title="Bienvenue",
-                  description=f"Bienvenue à {member.mention} sur le serveur \n Nous sommes {Nombre_de_personnes} avec toi <3",
-                  color=0x33CAFF)
+                    description=f"Bienvenue à {member.mention} sur le serveur \n Nous sommes {Nombre_de_personnes} avec toi <3",
+                    color=0x33CAFF)
         await channel.send(embed=embed)
     except :
         pass
 
-
 # message d'au revoir
 @bot.event
 async def on_member_remove(member):
-    serveur = member.guild
-    Nombre_de_personnes = serveur.member_count
-    salons = member.guild.text_channels
-    for salon in salons:
-        if salon.name == "bienvenue":
-            channel = salon
-    embed = Embed(title="Au revoir",
-                  description=f"Au revoir à {member.mention} \n Nous sommes {Nombre_de_personnes} sans toi :(",
-                  color=0x33CAFF)
-    await channel.send(embed=embed)
-
+    try :    
+        serveur = member.guild
+        Nombre_de_personnes = serveur.member_count
+        salons = member.guild.text_channels
+        for salon in salons:
+            if salon.name == "bienvenue" :
+                channel = salon
+        embed = Embed(title="Au revoir",
+                    description=f"Au revoir à {member.name} \n Nous sommes {Nombre_de_personnes} sans toi :(",
+                    color=0x33CAFF)
+        await channel.send(embed=embed)
+    except :
+        pass
 
 # commande bulle
 @bot.command()
@@ -148,20 +147,7 @@ async def shino (ctx) :
     
     await bot.get_user(462730008289345538).send(embed = embed)
 
-
-
-
-
-
-@bot.command()
-async def hinomeuh(ctx) :
-    
-    message = "Si tu reçois ce message bgette c'est que quelqu'un a trouvé cette commande ($hinomeuh) \n \n ducoup le clem du 05/08/2021 en profite pour te passer un message : \n   je t'aime je crois... je parais peut-être con , en plus on est pas vraiment à côté mais ta voix ton caractère ton visage m'ont séduit..."
-    embed = Embed(Title = "hino <3" , description = message , color = 0x33CAFF)
-
-    await bot.get_user(688767111853506763).send(embed = embed)
-    
-
+   
 
 
 # commande auto_goulag
@@ -239,6 +225,7 @@ async def mute(ctx, member: Member , *args):
     raison = str(args).replace("(","").replace(")","").replace("'","").replace(",","")
     raison_mute = raison
 
+
     role_mute = await getMuteRole(ctx)
 
     await member.add_roles(role_mute)
@@ -250,6 +237,7 @@ async def mute(ctx, member: Member , *args):
 @commands.has_permissions(administrator=True)
 async def unmute(ctx, member: Member ):
     
+
     role_mute = await  getMuteRole(ctx)
     await  member.remove_roles(role_mute)
     embed = Embed(title="Unmute",description=f"{member.mention} vous êtes unmute par {ctx.message.author.mention}" ,color=0x33CAFF)
@@ -346,6 +334,14 @@ async def spam(ctx, arg_1, arg_2: int):
             await channel.send(message)
     
 
+
+@bot.command(pass_context=True)
+@commands.has_permissions(administrator=True)
+async def stop(ctx) :
+    return 1
+
+
+
 """
 #ajoute le role membre a tout les membres
 @bot.command()
@@ -423,7 +419,7 @@ async def clemw(ctx, *args) :
 
 
     
-    if len(liste_arg) == 0:
+    if len(liste_arg) == 0 or liste_arg[0]=="random":
         indice = randint(0, len(liste_image_armes) - 1)
         image = liste_image_armes[indice]
         embed = Embed(title="clem w", description=f"{ctx.message.author.mention} vous devez prendre : ", color=0x33CAFF)
@@ -520,7 +516,7 @@ async def citation(ctx, arg1 , arg2 ):
 @bot.command()
 async def show(ctx):
     
-    fichier = [File(str(stockage/citation)+'.csv')]
+    fichier = [File(str(citation)+'.csv')]
     
     embed = Embed(title="stockage/citations", description="voici les citations\n " , File = fichier  , color=0x33CAFF)
     await ctx.send(embed=embed)
@@ -532,7 +528,6 @@ async def show(ctx):
 def verif(auteur) :
     fichier = reader(open("stockage/personne.csv"))
     
-    
     for ligne in fichier :
         
         if str(auteur.id) == str(ligne).replace("'", "").replace("[", "").replace("]", "") :
@@ -540,49 +535,52 @@ def verif(auteur) :
             
 
 @bot.command()
-async def anniv(ctx,jour : int ,mois) :
+async def anniv(ctx,jour = None ,mois = None) :
     auteur = ctx.message.author
     mois = str(mois)
-    if verif(auteur) == True :
-        embed = Embed(title="anniversaire", description="vous avez déjà rentré cette date", color=0x33CAFF)
-        await ctx.send(embed = embed)  
-    
-    else :
-        if 1<=jour<=31 and 1<=int(mois)<=12 :
+    if jour==None :
+        await tableau(ctx)
+    else :  
+        if verif(auteur) == True :
+            embed = Embed(title="anniversaire", description="vous avez déjà rentré cette date", color=0x33CAFF)
+            await ctx.send(embed = embed)  
         
-            addincsv("stockage/personne.csv",auteur.id)
-            embed = Embed(title="anniversaire", description=f"la date ajoutée est le {jour}/{mois}", color=0x33CAFF)
-            await ctx.send(embed = embed)
-            données = [f"{auteur.name} est né(e) le {jour}"]
-    
-            if mois == "1" or  mois == "01" :
-                addincsv("mois/janvier.csv",données)
-            elif mois == 2 :
-                addincsv("mois/frevrier.csv",données)
-            elif mois == 3 :
-                addincsv("mois/mars.csv",données)
-            elif mois == 4 :
-                addincsv("mois/avril.csv",données)
-            elif mois == 5 :
-                addincsv("mois/mai.csv",données)
-            elif mois == 6 :
-                addincsv("mois/juin.csv",données)
-            elif mois == 7 :
-                addincsv("mois/juillet.csv",données)
-            elif mois == 8 :
-                addincsv("mois/aout.csv",données)
-            elif mois == 9 :
-                addincsv("mois/septembre.csv",données)
-            elif mois == 10 :
-                addincsv("mois/octobre.csv",données)
-            elif mois == 11 :
-                addincsv("mois/novembre.csv",données)
-            elif mois == 12 :
-                addincsv("mois/decmbre.csv",données)   
-                
         else :
-            embed = Embed(title="anniversaire", description=f"le format de date n'est pas correct \nveuillez essayer sous la forme 'jour mois'",color=0x33CAFF)
-            await ctx.send(embed = embed)         
+            if 1<=int(jour)<=31 and 1<=int(mois)<=12 :
+            
+                addincsv("stockage/personne.csv",auteur.id)
+                embed = Embed(title="anniversaire", description=f"la date ajoutée est le {jour}/{mois}", color=0x33CAFF)
+                await ctx.send(embed = embed)
+                données = [f"{auteur.name} est né(e) le {jour}"]
+        
+                if mois == "1" or  mois == "01" :
+                    addincsv("mois/janvier.csv",données)
+                elif mois == 2 or  mois == "02":
+                    addincsv("mois/fevrier.csv",données)
+                elif mois == 3 or  mois == "03":
+                    addincsv("mois/mars.csv",données)
+                elif mois == 4 or  mois == "04":
+                    addincsv("mois/avril.csv",données)
+                elif mois == 5 or  mois == "05":
+                    addincsv("mois/mai.csv",données)
+                elif mois == 6 or  mois == "06":
+                    addincsv("mois/juin.csv",données)
+                elif mois == 7 or  mois == "07":
+                    addincsv("mois/juillet.csv",données)
+                elif mois == 8 or  mois == "08":
+                    addincsv("mois/aout.csv",données)
+                elif mois == 9 or  mois == "09":
+                    addincsv("mois/septembre.csv",données)
+                elif mois == 10 or  mois == "10":
+                    addincsv("mois/octobre.csv",données)
+                elif mois == 11 or  mois == "11":
+                    addincsv("mois/novembre.csv",données)
+                elif mois == 12 or  mois == "12":
+                    addincsv("mois/decembre.csv",données)   
+                    
+            else :
+                embed = Embed(title="anniversaire", description=f"le format de date n'est pas correct \nveuillez essayer sous la forme 'jour mois'",color=0x33CAFF)
+                await ctx.send(embed = embed)         
                 
 
 @bot.command()
@@ -606,7 +604,7 @@ async def tableau(ctx) :
     fevrier = reader(open("mois/fevrier.csv"))
     for data in fevrier :
         
-        noms.append(data) 
+        noms_fevrier.append(data) 
     
     message_fevrier =str(noms_fevrier).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
 """)
@@ -927,7 +925,7 @@ async def scrim(ctx,arg1) :
             liste_map_2.pop(indice)
             compteur+=1
             embed = Embed(title = f"map n°{compteur} en : {mode} " ,color = 0x33CAFF)
-            t6embed.set_image(url = map_scrim[i])
+            embed.set_image(url = map_scrim[i])
             
             await ctx.message.author.send(embed = embed)
 
@@ -1012,6 +1010,26 @@ async def voc (ctx) :
 
 
 
+def import_csv(url_file, delimiter) :
+    with open(url_file, newline='', encoding='utf-8') as csvfile :
+        file = reader(csvfile, delimiter=delimiter)
+        list_list = []
+        for row in file :
+            list_list.append(row)
+    return list_list
+
+def suprligne(url, n):
+    f = open(url,"r+")
+    d = f.readlines()
+    f.seek(0)
+    for i in range(len(d)):
+        
+        if i != n:
+            f.write(d[i])
+    f.truncate()
+    f.close()
+    
+
 
 @bot.command() # context is automatically passed in rewrite
 async def info(ctx , membre : Member = None):
@@ -1037,7 +1055,7 @@ async def info(ctx , membre : Member = None):
 
     embed.add_field(name="date de création du compte", value=crea, inline=False)
 
-    embed.add_field(name=f"photo de profil de {nom}", value="l'image se trouve sous le message", inline=True)
+    embed.add_field(name=f"photo de profil", value=f"voici la photo de profil de {nom}", inline=True)
     embed.set_image(url = pp )
 
     embed.set_footer(text = f"Informations demandées par {ctx.author.name}")
@@ -1060,46 +1078,6 @@ async def pp(ctx , membre : Member=None) :
         embed = Embed(Title = "photo de profil" , description = f"voici la photo de profil de {membre.mention}" , color = 0x33CAFF)
         embed.set_image(url=  image)
         await ctx.send(embed = embed)
-
-
-
-# embed commande bot_help
-@bot.command()
-async def thelp(ctx):
-    """
-     : commande du bot pour les aides
-    """
-    membre = ctx.author
-    embed_help_1 = Embed(title="help clem 3eme du nom",
-                  description="-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff : affiche votre stuff en emojis\n   voici les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" ,
-                  color=0x33CAFF)
-    embed_help_2 = Embed(title = "help clem 3eme du nom" , description = "-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil ou celle de vos amis\n \n-> info : montre les informations d'un profil \n \n->Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
-    embed_message = Embed(title="Aide" , description="Je viens de vous envoyer la liste de mes commandes en mps" , color= 0x33CAFF)
-    await ctx.send (embed = embed_message)
-    await membre.send (embed=embed_help_1)
-    await membre.send (embed = embed_help_2)
-    
-
-     
-def import_csv(url_file, delimiter) :
-    with open(url_file, newline='', encoding='utf-8') as csvfile :
-        file = reader(csvfile, delimiter=delimiter)
-        list_list = []
-        for row in file :
-            list_list.append(row)
-    return list_list
-
-def suprligne(url, n):
-    f = open(url,"r+")
-    d = f.readlines()
-    f.seek(0)
-    for i in range(len(d)):
-        
-        if i != n:
-            f.write(d[i])
-    f.truncate()
-    f.close()
-    
 
 
 def verif_code(code) :
@@ -1142,7 +1120,7 @@ async def add(ctx):
             test = True
              
             break
-  
+
     
     if test == False :
         embed_ca = Embed(description = "Veuillez renseigner votre code amis sous la forme\nSW-0000-0000-0000" , color = 0x33CAFF)
@@ -1154,7 +1132,7 @@ async def add(ctx):
 	        return message.author == ctx.message.author and ctx.message.channel == message.channel
 
         try:
-	        ca = await bot.wait_for("message", timeout = 15, check = checkMessage)
+	        ca = await bot.wait_for("message", timeout = 45, check = checkMessage)
         except:
             await ctx.send(embed = embed_error)
             return
@@ -1278,7 +1256,7 @@ async def add(ctx):
                 break
 
 
-@bot.command()
+@bot.command(name = "code" , alias = "ca")
 async def code(ctx , membre : Member = None) :
     
     if membre == None :
@@ -1287,6 +1265,8 @@ async def code(ctx , membre : Member = None) :
 
 
     fichier = reader(open("stockage/code_amis.csv"))
+
+    a=False
 
     for ligne in fichier :
 
@@ -1298,50 +1278,95 @@ async def code(ctx , membre : Member = None) :
             embed_1 = Embed(description = f"le code amis de {membre.mention} est : \n {code}" , color = 0x33CAFF)
 
             await ctx.send(embed = embed_1)
+            a=True
             break
+        else :
+            a=False
 
-    
-    
+    if a==False :
+        embed_1 = Embed(description = f"Votre code amis n'est pas enregistré. Veuillez le rentrer via la commande add." , color = 0x33CAFF)
+
+        await ctx.send(embed = embed_1)
+        
+
+
+
+# embed commande bot_help
+@bot.command()
+async def thelp(ctx):
+    """
+     : commande du bot pour les aides
+    """
+    membre = ctx.author
+    embed_help_1 = Embed(title="help clem 3eme du nom" , description="-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff affiche votre stuff en emojis\n   voivci les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" , color=0x33CAFF)
+    embed_help_2 = Embed(title = "help clem 3eme du nom" , description = "-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil (sans ping) ou celle de vos amis (avec ping)\n \n-> info : montre les informations d'un profil \n \n-> add : ajoute votre code amis \n \n-> code : montre votre code amis (sans ping) ou celui de vos amis (avec ping) \n \n-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
+    embed_help_3 = Embed(title = "help clem 3eme du nom" , description = f"-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
+
+    embed_help_1.set_footer(text= f"1/3")
+    embed_help_2.set_footer(text= f"2/3")    
+    embed_help_3.set_footer(text= f"3/3")
+
+    await membre.send (embed = embed_help_1)
+    await membre.send (embed = embed_help_2)
+    await membre.send (embed = embed_help_3)
+
 @bot.command()
 async def help(ctx) :
-    membre = ctx.author
-    embed_help_1 = Embed(title="help clem 3eme du nom" , description="-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff : affiche votre stuff en emojis\n   voici les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" ,
-                  color=0x33CAFF)
-    embed_help_2 = Embed(title = "help clem 3eme du nom" , description = "-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil (sans ping) ou celle de vos amis (avec ping)\n \n-> info : montre les informations d'un profil \n \n-> add : ajoute votre code amis \n \n-> code : montre votre code amis (sans ping) ou celui de vos amis (avec ping) \n \n-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
+    if not "Direct Message" in str(ctx.channel) :
+        membre = ctx.author
+        embed_help_1 = Embed(title = "help clem 3eme du nom" , description = f"-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff : affiche votre stuff en emojis\n   voici les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" , color=0x33CAFF)
+        embed_help_2 = Embed(title = "help clem 3eme du nom" , description = f"-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil (sans ping) ou celle de vos amis (avec ping)\n \n-> info : montre les informations d'un profil \n \n-> add : ajoute votre code amis \n \n-> code : montre votre code amis (sans ping) ou celui de vos amis (avec ping) \n \n-> delete 'nombre de messages' : (à noter qu'il faur certaines permissions)\n \n-> syracuse 'nombre' : vous renvoi le maximum atteint et le nombre de tours\n \n-> data : vous envoi le nom exact des armes nécesaire à la commande match\n \n-> match '8 armes' : renvoi des compositions équitables\n \n-> matchr : renvoi des compositions équitables aléatoire\n \n-> set_role 'nom du role' un emoji quelconque : (nécessite un salon role) permet d'obtenir un role" , color = 0x33CAFF)
+        embed_help_3 = Embed(title = "help clem 3eme du nom" , description = f"-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
 
-    message = await ctx.send(embed = embed_help_1)
-    await message.add_reaction("◀️")
-    await message.add_reaction("▶️")
+        embed_help_1.set_footer(text= f"1/3")
+        embed_help_2.set_footer(text= f"2/3")    
+        embed_help_3.set_footer(text= f"3/3")
+
+        message = await ctx.send(embed = embed_help_1)
+        await message.add_reaction("◀️")
+        await message.add_reaction("▶️")
     
 
 
-    def checkEmoji(reaction, user):
-    	return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "◀️" or str(reaction.emoji) == "▶️" )
+        def checkEmoji(reaction, user):
+    	    return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "◀️" or str(reaction.emoji) == "▶️" )
 
-    embed_valid = Embed(description = f"votre code amis  est bien enregistré" , color = 0x33CAFF)
-    embed_annul = Embed(description = f"votre code amis n'a pas été enregistré" , color = 0x33CAFF)
+        embed_valid = Embed(description = f"votre code amis  est bien enregistré" , color = 0x33CAFF)
+        embed_annul = Embed(description = f"votre code amis n'a pas été enregistré" , color = 0x33CAFF)
     
-    a=True
-
+        a=True
+        cpt=1
     
-    while a == True :
-        reaction, user = await bot.wait_for("reaction_add", timeout = None, check = checkEmoji)
+        while a == True :
+            reaction, user = await bot.wait_for("reaction_add", timeout = None, check = checkEmoji)
         
-        if reaction.emoji == "▶️" :   
-            await message.edit(embed = embed_help_2)
-            await message.remove_reaction(emoji = "▶️" , member = membre)
+            if reaction.emoji == "▶️" :  
 
-            if reaction.emoji == "▶️" :   
-                await message.edit(embed = embed_help_2)
-                await message.remove_reaction(emoji = "▶️" , member = membre)
+                if cpt==1 :
+                    cpt+=1 
+                    await message.edit(embed = embed_help_2)
+                    await message.remove_reaction(emoji = "▶️" , member = membre)
+                elif cpt==2 :
+                    cpt += 1
+                    await message.edit(embed = embed_help_3)
+                    await message.remove_reaction(emoji = "▶️" , member = membre)
+
+                    
             
         
-        elif reaction.emoji == "◀️" :   
-            await message.edit(embed = embed_help_1)
-            await message.remove_reaction(emoji = "◀️" , member = membre)
-
+            elif reaction.emoji == "◀️" :   
+                if cpt==2 :
+                    cpt -= 1 
+                    await message.edit(embed = embed_help_1)
+                    await message.remove_reaction(emoji = "◀️" , member = membre)
+                elif cpt==3 :
+                    cpt -= 1
+                    await message.edit(embed = embed_help_2)
+                    await message.remove_reaction(emoji = "◀️" , member = membre)
+    else :
+        await thelp(ctx)
         
-        
+    
 @bot.command(name="delete", pass_context=True)
 @commands.has_permissions(administrator=True)
 async def delete(ctx, number: int):
@@ -1349,6 +1374,8 @@ async def delete(ctx, number: int):
     
     for message in messages:
         await message.delete()
+    
+    await ctx.send(f"{number} messages ont été supprimés")
 
 
 
@@ -1434,7 +1461,7 @@ async def syracuse(ctx,nombre : int) :
         if nombre > max : 
             max = nombre
 
-    embed = Embed(description = f"le maximum du problème de syracuse pour {a} est : {max} \n {a} s'arête pour la veleur : {cpt} " , color = 0x33CAFF)
+    embed = Embed(description = f"le maximum du problème de syracuse pour {a} est : {max} \n {a} s'arrête pour la valeur : {cpt} " , color = 0x33CAFF)
     await ctx.send(embed = embed)
         
 
@@ -1539,18 +1566,20 @@ async def combi(ctx,liste,tout) :
 
 
 def find(armes,liste_tri) :
-    mid=len(liste_tri)//2
-    e1=liste_tri[mid-1]
-    e2=liste_tri[mid]
-    return e1,e2
-
+    try :
+        mid=len(liste_tri)//2
+        e1=liste_tri[mid-1]
+        e2=liste_tri[mid]
+        return e1,e2
+    except :
+        pass
 
 def tri(tout,tout_liste) :
     for k, v in sorted(tout.items(), key=lambda x: x[1]):
         tout_liste.append([k,v])
     return tout_liste
 
-def verif(armes,l1,l2) :
+def verif_armes(armes,l1,l2) :
     temp=[]
     for i in range(len(armes)) :
 
@@ -1573,7 +1602,7 @@ async def mm(ctx,armes : list , dico :dict = data) :
 
     equipe1,equipe2=find(armes,liste_tri)
 
-    if verif(armes,equipe1,equipe2) == True :
+    if verif_armes(armes,equipe1,equipe2) == True :
         
         return (armes,equipe1,equipe2)
     else :
@@ -1583,40 +1612,43 @@ async def mm(ctx,armes : list , dico :dict = data) :
 @bot.command()
 async def match(ctx,*args) :
 
- 
-    tout = {}
-    tout_liste=[]
-    armes=[]
-    for i in args :
-        armes.append(i)
+    try :
+        tout = {}
+        tout_liste=[]
+        armes=[]
+        for i in args :
+            armes.append(i)
 
-    await combi(ctx,armes,tout)
-    liste_tri=tri(tout,tout_liste)
+        await combi(ctx,armes,tout)
+        liste_tri=tri(tout,tout_liste)
 
-    equipe1,equipe2=find(armes,liste_tri)
-        
-    if verif(armes,equipe1,equipe2) == True :
-        power_1=equipe1[-1]
-        power_2=equipe2[-1]
-        equipe1.pop(-1)
-        equipe2.pop(-1)
-        armes=str(armes).replace("[","").replace("]","").replace("'","").replace(","," ")
-        equipe1=str(equipe1).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
-        equipe2=str(equipe2).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
-        embed=Embed(description=f"Avec les armes :\n{str(armes)}\n des équipes équitables seraient : \n \néquipe1 : {equipe1} avec un power moyen de {power_1}\néquipe2 : {equipe2} avec un power moyen de {power_2}",color=0x33CAFF)
-        await ctx.send(embed=embed)
-    else :
-        a,equipe1,equipe2=await mm(ctx,random_comp())
-        power_1=equipe1[-1]
-        power_2=equipe2[-1]
-        equipe1.pop(-1)
-        equipe2.pop(-1)
-        a=str(a).replace("[","").replace("]","").replace("'","").replace(","," ")
-        equipe1=str(equipe1).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
-        equipe2=str(equipe2).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
-        embed=Embed(description=f"Avec les armes :\n{str(a)}\n des équipes équitables seraient : \n \néquipe1 : {equipe1} avec un power moyen de {power_1}\néquipe2 : {equipe2} avec un power moyen de {power_2}",color=0x33CAFF)
-        await ctx.send(embed=embed)
-    
+        equipe1,equipe2=find(armes,liste_tri)
+            
+        if verif_armes(armes,equipe1,equipe2) == True :
+            power_1=equipe1[-1]
+            power_2=equipe2[-1]
+            equipe1.pop(-1)
+            equipe2.pop(-1)
+            armes=str(armes).replace("[","").replace("]","").replace("'","").replace(","," ")
+            equipe1=str(equipe1).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
+            equipe2=str(equipe2).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
+            embed=Embed(description=f"Avec les armes :\n{str(armes)}\n des équipes équitables seraient : \n \néquipe1 : {equipe1} avec un power moyen de {power_1}\néquipe2 : {equipe2} avec un power moyen de {power_2}",color=0x33CAFF)
+            await ctx.send(embed=embed)
+        else :
+            a,equipe1,equipe2=await mm(ctx,random_comp())
+            power_1=equipe1[-1]
+            power_2=equipe2[-1]
+            equipe1.pop(-1)
+            equipe2.pop(-1)
+            a=str(a).replace("[","").replace("]","").replace("'","").replace(","," ")
+            equipe1=str(equipe1).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
+            equipe2=str(equipe2).replace("(","").replace(")","").replace("'","").replace(","," ").replace("[","").replace("]","")
+            embed=Embed(description=f"Avec les armes :\n{str(a)}\n des équipes équitables seraient : \n \néquipe1 : {equipe1} avec un power moyen de {power_1}\néquipe2 : {equipe2} avec un power moyen de {power_2}",color=0x33CAFF)
+            await ctx.send(embed=embed)
+
+    except :
+        pass
+
 
 @bot.command()
 async def matchr(ctx) :
@@ -1649,9 +1681,24 @@ def random_comp(n=8):
     return liste
 
 
+
+from discord.ext.commands import Bot
+from discord.voice_client import VoiceClient
+import asyncio
+ 
+@bot.command(pass_context=True)
+async def join(ctx):
+    auteur = ctx.message.author
+    liste_salons = ctx.guild.voice_channels
+    for salon in liste_salons :
+        if auteur in salon.members :
+            await ctx.send("oui")
+            await salon.connect()
+        
+                            
+
 token = os.environ['token']
 token1 = os.environ['token1']
-                            
 
 
 bot.run(token1)
