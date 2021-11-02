@@ -58,6 +58,9 @@ async def infoserveur(ctx):
 # commande rôles
 @bot.command()
 async def roles(ctx):
+    """
+     : renvoi tous les roles d'un serveur
+    """
     serv = ctx.guild
     liste_roles = []
     liste_roles1 = []
@@ -82,6 +85,9 @@ async def roles(ctx):
 # message de bienvenue
 @bot.event
 async def on_member_join(member):
+    """
+     : envoi un message à l'arrivée d'un nouveau membre
+    """
     try :
         serveur = member.guild
         Nombre_de_personnes = serveur.member_count
@@ -105,6 +111,9 @@ async def on_member_join(member):
 # message d'au revoir
 @bot.event
 async def on_member_remove(member):
+    """
+     : envoi un message lorsque quelqu'un quitte le serveur
+    """
     try :    
         serveur = member.guild
         Nombre_de_personnes = serveur.member_count
@@ -142,6 +151,9 @@ async def ping(ctx):
 
 @bot.command()
 async def shino (ctx) :
+    """
+     : envoi un message à shino
+    """
     message = "shino... cv bae?"
     embed = Embed(Title = "shinouille" , description = message , color = 0x33CAFF)
     
@@ -506,8 +518,9 @@ async def citation(ctx, arg1 , arg2 ):
     """
      : arg_1 str (la citation)
     """
+    serveur = str(ctx.guild.name)
     message = f"{str(arg1)} par {str(arg2)}"
-    addincsv("stockage/citation.csv",message)
+    addincsv(f"stockage/citations/citation_{serveur}.csv",message)
     
 
     embed = Embed(title="citations", description=f"voici la citations ajoutées \n{message}", color=0x33CAFF)
@@ -515,10 +528,10 @@ async def citation(ctx, arg1 , arg2 ):
     
 @bot.command()
 async def show(ctx):
+    serveur = str(ctx.guild.name)
+    fichier = [File(str(f"stockage/citations/citation_{serveur}")+'.csv')]
     
-    fichier = [File(str(citation)+'.csv')]
-    
-    embed = Embed(title="stockage/citations", description="voici les citations\n " , File = fichier  , color=0x33CAFF)
+    embed = Embed(title="citations", description="voici les citations\n " , File = fichier  , color=0x33CAFF)
     await ctx.send(embed=embed)
     await ctx.send(files = fichier)
 
@@ -551,7 +564,7 @@ async def anniv(ctx,jour = None ,mois = None) :
                 addincsv("stockage/personne.csv",auteur.id)
                 embed = Embed(title="anniversaire", description=f"la date ajoutée est le {jour}/{mois}", color=0x33CAFF)
                 await ctx.send(embed = embed)
-                données = [f"{auteur.name} est né(e) le {jour}"]
+                données = [auteur.id,[f" est né(e) le {jour}"]]
         
                 if mois == "1" or  mois == "01" :
                     addincsv("mois/janvier.csv",données)
@@ -588,25 +601,40 @@ async def tableau(ctx) :
     membre = ctx.author
 #janvier
     noms_janvier = []
+    jour_janvier = []
+    message_janvier = ""
     janvier = reader(open("mois/janvier.csv"))
     for data in janvier :
-        
-        noms_janvier.append(data) 
+        noms_janvier.append(data[0])
+        jour_janvier.append(data[1])
+   
     
-    message_janvier =str(noms_janvier).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_janvier)) :
+        a=noms_janvier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne = bot.get_user(int(a))
+        b=jour_janvier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_janvier = message_janvier + str(personne) + str(b) + str("""
 """)
+
 
     embed_janvier = Embed(title = "janvier" , description = f"voici les personnes nées en janvier : \n {message_janvier}" , color = 0x33CAFF)
     #await membre.send( embed = embed_janvier)
 
 #fevrier
     noms_fevrier = []
+    jour_fevrier = []
+    message_fevrier = ""
     fevrier = reader(open("mois/fevrier.csv"))
     for data in fevrier :
-        
-        noms_fevrier.append(data) 
+        noms_fevrier.append(data[0])
+        jour_fevrier.append(data[1])
+    print(noms_fevrier)
     
-    message_fevrier =str(noms_fevrier).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_fevrier)) :
+        a=noms_fevrier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_fevrier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_fevrier = message_fevrier + str(personne) + str(b) + str("""
 """)
     
     embed_fevrier = Embed(title = "fevrier" , description = f"voici les personnes nées en fevrier : \n {message_fevrier}" , color = 0x33CAFF)
@@ -615,12 +643,19 @@ async def tableau(ctx) :
 
 #mars
     noms_mars = []
+    jour_mars = []
+    message_mars = ""
     mars = reader(open("mois/mars.csv"))
     for data in mars :
-        
-        noms_mars.append(data) 
+        noms_mars.append(data[0])
+        jour_mars.append(data[1])
+    print(noms_mars)
     
-    message_mars =str(noms_mars).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_mars)) :
+        a=noms_mars[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_mars[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_mars = message_mars + str(personne) + str(b) + str("""
 """)
 
     embed_mars = Embed(title = "mars" , description = f"voici les personnes nées en mars : \n {message_mars}" , color = 0x33CAFF)
@@ -629,12 +664,19 @@ async def tableau(ctx) :
 
 #avril
     noms_avril = []
+    jour_avril = []
+    message_avril = ""
     avril = reader(open("mois/avril.csv"))
     for data in avril :
-        
-        noms_avril.append(data) 
+        noms_avril.append(data[0])
+        jour_avril.append(data[1])
+    print(noms_avril)
     
-    message_avril =str(noms_avril).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_avril)) :
+        a=noms_avril[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_avril[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_avril = message_avril + str(personne) + str(b) + str("""
 """)
 
     embed_avril = Embed(title = "avril" , description = f"voici les personnes nées en avril : \n {message_avril}" , color = 0x33CAFF)
@@ -642,18 +684,25 @@ async def tableau(ctx) :
     
 
 
-    embed_1_4 = Embed(title = "anniversaires" , description = f"Voici les personnes nées en janvier : \n {message_janvier} \n \nVoici les personnes nées en fevrier : \n {message_fevrier} \n \nVoici les personnes nées en mars : \n {message_mars}\n \nVoici les personnes nées en avril : \n {message_avril}" , color = 0x33CAFF )
+    embed_1_4 = Embed(title = "anniversaires" , description = f"Voici les personnes nées en mai : \n {message_janvier} \n \nVoici les personnes nées en fevrier : \n {message_fevrier} \n \nVoici les personnes nées en mars : \n {message_mars}\n \nVoici les personnes nées en avril : \n {message_avril}" , color = 0x33CAFF )
     await membre.send(embed = embed_1_4)    
 
 
 #mai
     noms_mai = []
+    jour_mai = []
+    message_mai = ""
     mai = reader(open("mois/mai.csv"))
     for data in mai :
-        
-        noms_mai.append(data) 
+        noms_mai.append(data[0])
+        jour_mai.append(data[1])
+    print(noms_mai)
     
-    message_mai =str(noms_mai).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_mai)) :
+        a=noms_mai[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_mai[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_mai = message_mai + str(personne) + str(b) + str("""
 """)
 
     embed_mai = Embed(title = "mai" , description = f"voici les personnes nées en mai : \n {message_mai}" , color = 0x33CAFF)
@@ -662,26 +711,40 @@ async def tableau(ctx) :
 
 #juin
     noms_juin = []
+    jour_juin = []
+    message_juin = ""
     juin = reader(open("mois/juin.csv"))
     for data in juin :
-        
-        noms_juin.append(data) 
+        noms_juin.append(data[0])
+        jour_juin.append(data[1])
+    print(noms_juin)
     
-    message_juin =str(noms_juin).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_juin)) :
+        a=noms_juin[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_juin[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_juin = message_juin + str(personne) + str(b) + str("""
 """)
 
     embed_juin = Embed(title = "juin" , description = f"voici les personnes nées en juin : \n {message_juin}" , color = 0x33CAFF)
-    #await membre.send( embed = embed_juin)
+    
 
 
 #juillet
     noms_juillet = []
+    jour_juillet = []
+    message_juillet = ""
     juillet = reader(open("mois/juillet.csv"))
     for data in juillet :
-        
-        noms_juillet.append(data) 
+        noms_juillet.append(data[0])
+        jour_juillet.append(data[1])
+    print(noms_juillet)
     
-    message_juillet =str(noms_juillet).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_juillet)) :
+        a=noms_juillet[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_juillet[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_juillet = message_juillet + str(personne) + str(b) + str("""
 """)
 
     embed_juillet = Embed(title = "juillet" , description = f"voici les personnes nées en juillet : \n {message_juillet}" , color = 0x33CAFF)
@@ -690,12 +753,19 @@ async def tableau(ctx) :
 
 #aout
     noms_aout = []
+    jour_aout = []
+    message_aout = ""
     aout = reader(open("mois/aout.csv"))
     for data in aout :
-        
-        noms_aout.append(data) 
+        noms_aout.append(data[0])
+        jour_aout.append(data[1])
+    print(noms_aout)
     
-    message_aout =str(noms_aout).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_aout)) :
+        a=noms_aout[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_aout[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_aout = message_aout + str(personne) + str(b) + str("""
 """)
 
     embed_aout = Embed(title = "aout" , description = f"voici les personnes nées en aout : \n {message_aout}" , color = 0x33CAFF)
@@ -711,12 +781,19 @@ async def tableau(ctx) :
 
 #septembre
     noms_septembre = []
+    jour_septembre = []
+    message_septembre = ""
     septembre = reader(open("mois/septembre.csv"))
     for data in septembre :
-        
-        noms_septembre.append(data) 
+        noms_septembre.append(data[0])
+        jour_septembre.append(data[1])
+    print(noms_septembre)
     
-    message_septembre =str(noms_septembre).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_septembre)) :
+        a=noms_septembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_septembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_septembre = message_septembre + str(personne) + str(b) + str("""
 """)
 
     embed_septembre = Embed(title = "septembre" , description = f"voici les personnes nées en septembre : \n {message_septembre}" , color = 0x33CAFF)
@@ -725,12 +802,19 @@ async def tableau(ctx) :
 
 #octobre
     noms_octobre = []
+    jour_octobre = []
+    message_octobre = ""
     octobre = reader(open("mois/octobre.csv"))
     for data in octobre :
-        
-        noms_octobre.append(data) 
+        noms_octobre.append(data[0])
+        jour_octobre.append(data[1])
+    print(noms_octobre)
     
-    message_octobre =str(noms_octobre).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_octobre)) :
+        a=noms_octobre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_octobre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_octobre = message_octobre + str(personne) + str(b) + str("""
 """)
 
     embed_octobre = Embed(title = "octobre" , description = f"voici les personnes nées en octobre : \n {message_octobre}" , color = 0x33CAFF)
@@ -739,12 +823,19 @@ async def tableau(ctx) :
 
 #novembre
     noms_novembre = []
+    jour_novembre = []
+    message_novembre = ""
     novembre = reader(open("mois/novembre.csv"))
     for data in novembre :
-        
-        noms_novembre.append(data) 
+        noms_novembre.append(data[0])
+        jour_novembre.append(data[1])
+    print(noms_novembre)
     
-    message_novembre =str(noms_novembre).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_novembre)) :
+        a=noms_novembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_novembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_novembre = message_novembre + str(personne) + str(b) + str("""
 """)
 
     embed_novembre = Embed(title = "novembre" , description = f"voici les personnes nées en novembre : \n {message_novembre}" , color = 0x33CAFF)
@@ -753,12 +844,19 @@ async def tableau(ctx) :
 
 #decembre
     noms_decembre = []
+    jour_decembre = []
+    message_decembre = ""
     decembre = reader(open("mois/decembre.csv"))
     for data in decembre :
-        
-        noms_decembre.append(data) 
+        noms_decembre.append(data[0])
+        jour_decembre.append(data[1])
+    print(noms_decembre)
     
-    message_decembre =str(noms_decembre).replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","""
+    for i in range(len(noms_decembre)) :
+        a=noms_decembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        
+        b=jour_decembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        message_decembre = message_decembre + str(personne) + str(b) + str("""
 """)
 
     embed_decembre = Embed(title = "decembre" , description = f"voici les personnes nées en decembre : \n {message_decembre}" , color = 0x33CAFF)
@@ -1687,12 +1785,8 @@ import asyncio
 from discord import FFmpegPCMAudio
 
 musics = {}
+dico = {}
 ytdl = youtube_dl.YoutubeDL()
-
-
-@bot.event
-async def on_ready():
-    print("Ready")
 
 
 class Video:
@@ -1701,6 +1795,7 @@ class Video:
         video_format = video["formats"][0]
         self.url = video["webpage_url"]
         self.stream_url = video_format["url"]
+       
 
 @bot.command()
 async def leave(ctx):
@@ -1709,10 +1804,18 @@ async def leave(ctx):
     musics[ctx.guild] = []
 
 @bot.command()
+async def dc(ctx):
+    client = ctx.guild.voice_client
+    await client.disconnect()
+    musics[ctx.guild] = []
+
+
+@bot.command()
 async def resume(ctx):
     client = ctx.guild.voice_client
     if client.is_paused():
         client.resume()
+        await ctx.send("je reprend la lecture")
 
 
 @bot.command()
@@ -1722,12 +1825,16 @@ async def pause(ctx , url = None):
         client.pause()
         await ctx.send("pause")
     
+    else :
+        await resume(ctx)
+    
 
 
 @bot.command()
 async def skip(ctx):
     client = ctx.guild.voice_client
     client.stop()
+    await ctx.send("je change de son")
 
 
 def play_song(client, queue, song):
@@ -1735,31 +1842,55 @@ def play_song(client, queue, song):
         , before_options = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"))
 
     def next(_):
-        if len(queue) > 0:
-            new_song = queue[0]
-            del queue[0]
-            play_song(client, queue, new_song)
-        else:
-            asyncio.run_coroutine_threadsafe(client.disconnect(), bot.loop)
+        try :
+            if len(queue) > 0:
+                new_song = queue[0]
+                del queue[0]
+                play_song(client, queue, new_song)
+            else:
+                asyncio.run_coroutine_threadsafe(client.disconnect(), bot.loop)
+        except :
+            pass
 
     client.play(source, after=next)
 
 
 @bot.command()
-async def play(ctx, url):
-    print("play")
-    client = ctx.guild.voice_client
+async def play(ctx, *args):
+    a=[]
+    for i in args :
+        a.append(i)
+    url = str(a).replace("[","").replace("]","").replace("'","").replace(","," ")
+    
+    try :
+        client = ctx.guild.voice_client
 
-    if client and client.channel:
-        video = Video(url)
-        musics[ctx.guild].append(video)
-    else:
-        channel = ctx.author.voice.channel
-        video = Video(url)
-        musics[ctx.guild] = []
-        client = await channel.connect()
-        await ctx.send(f"Je lance : {video.url}")
-        play_song(client, musics[ctx.guild], video)  
+        if client and client.channel:
+            video = Video(url)
+            musics[ctx.guild].append(video)
+            
+        else:
+            await ctx.send("J'arrive, je traite votre demande")
+            channel = ctx.author.voice.channel
+            video = Video(url)
+            musics[ctx.guild] = []
+            client = await channel.connect()
+            play_song(client, musics[ctx.guild], video)  
+            embed_musique = Embed(title = f"Musique" , description = f"je lance la musique : ")
+            embed_musique.url(url=video.url)
+            await ctx.send(embed = embed_musique)
+            
+    except :
+        await ctx.send("il y a eu une erreur")
+
+@bot.command()
+async def queue(ctx) :
+    
+    if len(musics[ctx.guild])>=1 :
+        await ctx.send(musics[ctx.guild])
+    else :
+        await ctx.send("il n'y a pas d'autres videos")
+    
 
 
                             
