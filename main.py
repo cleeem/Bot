@@ -518,13 +518,16 @@ async def citation(ctx, arg1 , arg2 ):
     """
      : arg_1 str (la citation)
     """
-    serveur = str(ctx.guild.name)
-    message = f"{str(arg1)} par {str(arg2)}"
-    addincsv(f"stockage/citations/citation_{serveur}.csv",message)
     
-
-    embed = Embed(title="citations", description=f"voici la citations ajoutées \n{message}", color=0x33CAFF)
-    await ctx.send(embed=embed)
+    if arg2.startswith("<@!") :
+        embed = Embed(description = "veuillez mettre le nom et non une mention de la personne" , color = 0x33CAFF)
+        await ctx.send(embed = embed)
+    else :
+        serveur = str(ctx.guild.name)
+        message = f"{str(arg1)} par {str(arg2)}"
+        addincsv(f"stockage/citations/citation_{serveur}.csv",message)
+        embed = Embed(title="citations", description=f"voici la citations ajoutées \n{message}", color=0x33CAFF)
+        await ctx.send(embed=embed)
     
 @bot.command()
 async def show(ctx):
