@@ -5,6 +5,7 @@ from random import *
 from csv import *
 from discord.utils import get
 from csv import *
+import fichier_stuff as fs
 
 client = Client()
 
@@ -875,119 +876,258 @@ async def stuff(ctx,*args) :
     """
      : 12 arguments -> (ssu,rsu,scu,spu,ss,qsj,qr,os,mpu,iss,ism,bdu,cbl,ir,iru,dr,lde,sbpu,tnty,hnt,ns,thi,rsp,sj,og)
     """
-    stuf = []
-    liste = []
-    for n in args :
-        
-        liste.append(n)
     
-    i = 0
-    returne = True
+    
+    embed_message = Embed(description = f" sous quelle forme voulez vous votre stuff? ⏺ : emoji ou ⏹ : image\nNote : l'image peut prendre du temps à s'afficher " , color = 0x33CAFF)
 
-    while i != 12:
-        try:
-            if liste[i] == 'ssu' or liste[i] == "Ssu" or liste[i] == "SSU" :
-                stuf.append('<:ssu:855390371827023882>')
-                i += 1
-            elif liste[i] == 'rsu'or liste[i] == "Rsu" or liste[i] == "RSU":
-                stuf.append('<:rsu:855390367264407572>')
-                i += 1
-            elif liste[i] == 'scu' or liste[i] == "Scu" or liste[i] == "SCU":
-                stuf.append('<:scu:855390371840000001>')
-                i += 1
-            elif liste[i] == 'spu' or liste[i] == "Spu" or liste[i] == "SPU":
-                stuf.append('<:spu:855390372254318622>')
-                i += 1
-            elif liste[i] == 'ss' or liste[i] == "Ss" or liste[i] == "SS":
-                stuf.append('<:ss:855390372129144842>')
-                i += 1
-            elif liste[i] == 'qsj' or liste[i] == "Qsj" or liste[i] == "QSJ":
-                stuf.append('<:qsj:855390367745310750>')
-                i += 1
-            elif liste[i] == 'qr' or liste[i] == "Qr" or liste[i] == "QR":
-                stuf.append('<:qr:855390372208312330>')
-                i += 1
-            elif liste[i] == 'os' or liste[i] == "Os" or liste[i] == "OS":
-                stuf.append('<:os:855390368778027038>')
-                i += 1
-            elif liste[i] == 'mpu' or liste[i] == "Mpu" or liste[i] == "MPU":
-                stuf.append('<:mpu:855390368131842068>')
-                i += 1
-            elif liste[i] == 'iss' or liste[i] == "Iss" or liste[i] == "ISS":
-                stuf.append('<:iss:855390372125868063>')
-                i += 1
-            elif liste[i] == 'ism' or liste[i] == "Ism" or liste[i] == "ISM":
-                stuf.append('<:ism:855390367586975745>')
-                i += 1
-            elif liste[i] == 'bdu' or liste[i] == "Bdu" or liste[i] == "BDU":
-                stuf.append('<:bdu:855390365708058624>')
-                i += 1
-            elif liste[i] == 'cbk' or liste[i] == "Cbk" or liste[i] == "CBK":
-                stuf.append('<:cbk:855390366157242388>')
-                i += 1
-            elif liste[i] == 'ir' or liste[i] == "Ir" or liste[i] == "IR":
-                stuf.append('<:ir:855390370362556436>')
-                i += 1
-            elif liste[i] == 'dr' or liste[i] == "Dr" or liste[i] == "DR":
-                stuf.append('<:dr:855390372204773387>')
-                i += 1
-            elif liste[i] == 'iru' or liste[i] == "Iru" or liste[i] == "IRU":
-                stuf.append('<:iru:855390367464292352>')
-                i += 1
-            elif liste[i] == 'lde' or liste[i] == "Lde" or liste[i] == "LDE":
-                stuf.append('<:lde:855390366755717120>')
-                i += 1
-            elif liste[i] == 'sbpu' or liste[i] == "Sbpu" or liste[i] == "SBPU":
-                stuf.append('<:sbpu:855390365895753749>')
-                i += 1
-            elif liste[i] == 'tnty' or liste[i] == "Tnty" or liste[i] == "TNTY":
-                stuf.append('<:tnty:855390368065388576>')
-                i += 1
-            elif liste[i] == 'hnt' or liste[i] == "Hnt" or liste[i] == "HNT":
-                stuf.append('<:hnt:855390366453989426>')
-                i += 1
-            elif liste[i] == 'ns' or liste[i] == "Ns" or liste[i] == "NS":
-                stuf.append('<:ns:855390376185692180>')
-                i += 1
-            elif liste[i] == 'thi' or liste[i] == "Thi" or liste[i] == "THi":
-                stuf.append('<:ti:855390376374304798>')
-                i += 1
-            elif liste[i] == 'rsp' or liste[i] == "Rsp" or liste[i] == "RSP":
-                stuf.append('<:rp:855390366991646730>')
-                i += 1
-            elif liste[i] == 'sj' or liste[i] == "Sj" or liste[i] == "SJ":
-                stuf.append('<:sj:855390376235892756>')
-                i += 1
-            elif liste[i] == 'og' or liste[i] == "Og" or liste[i] == "OG":
-                stuf.append('<:og:855390372141465610>')
-                i += 1
-            elif liste[i] == 'ab' or liste[i] == "Ab" or liste[i] == "AB":
-                stuf.append('<:ab:855479824009527306> ')
-                i += 1
-            elif liste[i] == 'uk' or liste[i] == "?" or liste[i] == "Uk" or liste[i] == "UK" :
-                stuf.append('<:uk:855479856511057951>')
-                i += 1
-            else:
-                returne = False
-                break
-            if i == 4 or i == 8:
-                stuf.append('newline')
+    message = await ctx.send(embed = embed_message)
+    await message.add_reaction("⏺")
+    await message.add_reaction("⏹")
 
 
-        except:
-            break
-    if returne:
-        a = str(stuf)
+    def checkEmoji(reaction, user):
+        return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "⏺" or str(reaction.emoji) == "⏹")
 
-        a = a.replace('[', '').replace(']', '').replace(',', '').replace("'", '').replace('newline', '''
-        ''').replace('         ','')
+ 
+
+    try:
+        reaction, user = await bot.wait_for("reaction_add", timeout = 20, check = checkEmoji)
         
-        embed = Embed(title = "stuff" , description = f"{a}" , color = 0x33CAFF)
+        if reaction.emoji == "⏺" :
+            stuf = []
+            liste = []
+            for n in args :
+        
+                liste.append(n)
+            i = 0
+            returne = True
 
-        await ctx.send(embed = embed)
-    else:
-        embed = Embed(title = "bonus inconnu" , description = 'le bonus n°' + str(i) + ' est introuvable' , color = 0x33CAFF)
-        await ctx.send(embed = embed)
+            while i != 12:
+                try:
+                    if liste[i] == 'ssu' or liste[i] == "Ssu" or liste[i] == "SSU" :
+                        stuf.append('<:ssu:855390371827023882>')
+                        i += 1
+                    elif liste[i] == 'rsu'or liste[i] == "Rsu" or liste[i] == "RSU":
+                        stuf.append('<:rsu:855390367264407572>')
+                        i += 1
+                    elif liste[i] == 'scu' or liste[i] == "Scu" or liste[i] == "SCU":
+                        stuf.append('<:scu:855390371840000001>')
+                        i += 1
+                    elif liste[i] == 'spu' or liste[i] == "Spu" or liste[i] == "SPU":
+                        stuf.append('<:spu:855390372254318622>')
+                        i += 1
+                    elif liste[i] == 'ss' or liste[i] == "Ss" or liste[i] == "SS":
+                        stuf.append('<:ss:855390372129144842>')
+                        i += 1
+                    elif liste[i] == 'qsj' or liste[i] == "Qsj" or liste[i] == "QSJ":
+                        stuf.append('<:qsj:855390367745310750>')
+                        i += 1
+                    elif liste[i] == 'qr' or liste[i] == "Qr" or liste[i] == "QR":
+                        stuf.append('<:qr:855390372208312330>')
+                        i += 1
+                    elif liste[i] == 'os' or liste[i] == "Os" or liste[i] == "OS":
+                        stuf.append('<:os:855390368778027038>')
+                        i += 1
+                    elif liste[i] == 'mpu' or liste[i] == "Mpu" or liste[i] == "MPU":
+                        stuf.append('<:mpu:855390368131842068>')
+                        i += 1
+                    elif liste[i] == 'iss' or liste[i] == "Iss" or liste[i] == "ISS":
+                        stuf.append('<:iss:855390372125868063>')
+                        i += 1
+                    elif liste[i] == 'ism' or liste[i] == "Ism" or liste[i] == "ISM":
+                        stuf.append('<:ism:855390367586975745>')
+                        i += 1
+                    elif liste[i] == 'bdu' or liste[i] == "Bdu" or liste[i] == "BDU":
+                        stuf.append('<:bdu:855390365708058624>')
+                        i += 1
+                    elif liste[i] == 'cbk' or liste[i] == "Cbk" or liste[i] == "CBK":
+                        stuf.append('<:cbk:855390366157242388>')
+                        i += 1
+                    elif liste[i] == 'ir' or liste[i] == "Ir" or liste[i] == "IR":
+                        stuf.append('<:ir:855390370362556436>')
+                        i += 1
+                    elif liste[i] == 'dr' or liste[i] == "Dr" or liste[i] == "DR":
+                        stuf.append('<:dr:855390372204773387>')
+                        i += 1
+                    elif liste[i] == 'iru' or liste[i] == "Iru" or liste[i] == "IRU":
+                        stuf.append('<:iru:855390367464292352>')
+                        i += 1
+                    elif liste[i] == 'lde' or liste[i] == "Lde" or liste[i] == "LDE":
+                        stuf.append('<:lde:855390366755717120>')
+                        i += 1
+                    elif liste[i] == 'sbpu' or liste[i] == "Sbpu" or liste[i] == "SBPU":
+                        stuf.append('<:sbpu:855390365895753749>')
+                        i += 1
+                    elif liste[i] == 'tnty' or liste[i] == "Tnty" or liste[i] == "TNTY":
+                        stuf.append('<:tnty:855390368065388576>')
+                        i += 1
+                    elif liste[i] == 'hnt' or liste[i] == "Hnt" or liste[i] == "HNT":
+                        stuf.append('<:hnt:855390366453989426>')
+                        i += 1
+                    elif liste[i] == 'ns' or liste[i] == "Ns" or liste[i] == "NS":
+                        stuf.append('<:ns:855390376185692180>')
+                        i += 1
+                    elif liste[i] == 'thi' or liste[i] == "Thi" or liste[i] == "THi":
+                        stuf.append('<:ti:855390376374304798>')
+                        i += 1
+                    elif liste[i] == 'rsp' or liste[i] == "Rsp" or liste[i] == "RSP":
+                        stuf.append('<:rp:855390366991646730>')
+                        i += 1
+                    elif liste[i] == 'sj' or liste[i] == "Sj" or liste[i] == "SJ":
+                        stuf.append('<:sj:855390376235892756>')
+                        i += 1
+                    elif liste[i] == 'og' or liste[i] == "Og" or liste[i] == "OG":
+                        stuf.append('<:og:855390372141465610>')
+                        i += 1
+                    elif liste[i] == 'ab' or liste[i] == "Ab" or liste[i] == "AB":
+                        stuf.append('<:ab:855479824009527306> ')
+                        i += 1
+                    elif liste[i] == 'uk' or liste[i] == "?" or liste[i] == "Uk" or liste[i] == "UK" :
+                        stuf.append('<:uk:855479856511057951>')
+                        i += 1
+                    else:
+                        returne = False
+                        break
+                    if i == 4 or i == 8:
+                        stuf.append('newline')
+
+
+                except:
+                    break
+            if returne:
+                a = str(stuf)
+
+                a = a.replace('[', '').replace(']', '').replace(',', '').replace("'", '').replace('newline', '''
+                ''').replace('         ','')
+                
+                embed = Embed(title = "stuff" , description = f"{a}" , color = 0x33CAFF)
+
+                await ctx.send(embed = embed)
+            else:
+                embed = Embed(title = "bonus inconnu" , description = 'le bonus n°' + str(i) + ' est introuvable' , color = 0x33CAFF)
+                await ctx.send(embed = embed)
+            
+            
+
+        elif reaction.emoji == "⏹" :
+            stuf = []
+            liste = []
+            for n in args :
+        
+                liste.append(n)
+            i = 0
+            returne = True
+
+            while i != 12:
+                try:
+                    if liste[i] == 'ssu' or liste[i] == "Ssu" or liste[i] == "SSU" :
+                        fs.ssu(i+1)
+                        i += 1
+                    elif liste[i] == 'rsu'or liste[i] == "Rsu" or liste[i] == "RSU":
+                        fs.rsu(i+1)
+                        i += 1
+                    elif liste[i] == 'scu' or liste[i] == "Scu" or liste[i] == "SCU":
+                        fs.scu(i+1)
+                        i += 1
+                    elif liste[i] == 'spu' or liste[i] == "Spu" or liste[i] == "SPU":
+                        fs.spu(i+1)
+                        i += 1
+                    elif liste[i] == 'ss' or liste[i] == "Ss" or liste[i] == "SS":
+                        fs.ss(i+1)
+                        i += 1
+                    elif liste[i] == 'qsj' or liste[i] == "Qsj" or liste[i] == "QSJ":
+                        fs.qsj(i+1)
+                        i += 1
+                    elif liste[i] == 'qr' or liste[i] == "Qr" or liste[i] == "QR":
+                        fs.qr(i+1)
+                        i += 1
+                    elif liste[i] == 'os' or liste[i] == "Os" or liste[i] == "OS":
+                        fs.os(i+1)
+                        i += 1
+                    elif liste[i] == 'mpu' or liste[i] == "Mpu" or liste[i] == "MPU":
+                        fs.mpu(i+1)
+                        i += 1
+                    elif liste[i] == 'iss' or liste[i] == "Iss" or liste[i] == "ISS":
+                        fs.iss(i+1)
+                        i += 1
+                    elif liste[i] == 'ism' or liste[i] == "Ism" or liste[i] == "ISM":
+                        fs.ism(i+1)
+                        i += 1
+                    elif liste[i] == 'bdu' or liste[i] == "Bdu" or liste[i] == "BDU":
+                        fs.bdu(i+1)
+                        i += 1
+                    elif liste[i] == 'cbk' or liste[i] == "Cbk" or liste[i] == "CBK":
+                        fs.cbk(i+1)
+                        i += 1
+                    elif liste[i] == 'ir' or liste[i] == "Ir" or liste[i] == "IR":
+                        fs.ir(i+1)
+                        i += 1
+                    elif liste[i] == 'dr' or liste[i] == "Dr" or liste[i] == "DR":
+                        fs.dr(i+1)
+                        i += 1
+                    elif liste[i] == 'iru' or liste[i] == "Iru" or liste[i] == "IRU":
+                        fs.iru(i+1)
+                        i += 1
+                    elif liste[i] == 'lde' or liste[i] == "Lde" or liste[i] == "LDE":
+                        fs.lde(i+1)
+                        i += 1
+                    elif liste[i] == 'sbpu' or liste[i] == "Sbpu" or liste[i] == "SBPU":
+                        fs.sbpu(i+1)
+                        i += 1
+                    elif liste[i] == 'tnty' or liste[i] == "Tnty" or liste[i] == "TNTY":
+                        fs.tnty(i+1)
+                        i += 1
+                    elif liste[i] == 'hnt' or liste[i] == "Hnt" or liste[i] == "HNT":
+                        fs.hnt(i+1)
+                        i += 1
+                    elif liste[i] == 'ns' or liste[i] == "Ns" or liste[i] == "NS":
+                        fs.ns(i+1)
+                        i += 1
+                    elif liste[i] == 'thi' or liste[i] == "Thi" or liste[i] == "THi":
+                        fs.thi(i+1)
+                        i += 1
+                    elif liste[i] == 'rsp' or liste[i] == "Rsp" or liste[i] == "RSP":
+                        fs.rsp(i+1)
+                        i += 1
+                    elif liste[i] == 'sj' or liste[i] == "Sj" or liste[i] == "SJ":
+                        fs.sj(i+1)
+                        i += 1
+                    elif liste[i] == 'og' or liste[i] == "Og" or liste[i] == "OG":
+                        fs.og(i+1)
+                        i += 1
+                    elif liste[i] == 'ab' or liste[i] == "Ab" or liste[i] == "AB":
+                        fs.ab(i+1)
+                        i += 1
+                    elif liste[i] == 'uk' or liste[i] == "?" or liste[i] == "Uk" or liste[i] == "UK" :
+                        fs.uk(i+1)
+                        i += 1
+                    else:
+                        returne = False
+                        break            
+                    
+
+                except:
+                    break
+            if returne:
+                        
+                embed = Embed(title = "stuff" , description = f"voici le stuff en image" , color = 0x33CAFF)
+
+                await ctx.send(embed = embed)
+
+                await ctx.send(file = File(r"images_bot/emote_stuff/blanc_resultat.png")) 
+                
+                for i in range(1,12) :
+                    fs.clear(i)
+                
+
+            else:
+                embed = Embed(title = "bonus inconnu" , description = 'le bonus n°' + str(i) + ' est introuvable' , color = 0x33CAFF)
+                await ctx.send(embed = embed)
+                
+                for i in range(1,12) :
+                    fs.clear(i)
+    except :
+        pass
 
 
 @bot.command()
@@ -1888,16 +2028,16 @@ async def play(ctx, *args):
 
 @bot.command()
 async def queue(ctx) :
-    
+    f
     if len(musics[ctx.guild])>=1 :
         await ctx.send(musics[ctx.guild])
     else :
         await ctx.send("il n'y a pas d'autres videos")
     
 
-
                             
 token = os.environ['token']
 token1 = os.environ['token1']
+
 
 bot.run(token1)
