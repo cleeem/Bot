@@ -162,7 +162,6 @@ async def shino (ctx) :
 
    
 
-
 # commande auto_goulag
 liste_goulag = ["Tu devrais faire un tour au goulag", "TA PLACE C'EST AU GOULAG!!!",
                 "Il y a des goulags qui se perdent"]
@@ -526,14 +525,14 @@ async def citation(ctx, arg1 , arg2 ):
     else :
         serveur = str(ctx.guild.name)
         message = f"{str(arg1)} par {str(arg2)}"
-        addincsv(f"stockage/citations/citation_{serveur}.csv",message)
+        addincsv(f"citations/citation_{serveur}.csv",message)
         embed = Embed(title="citations", description=f"voici la citations ajoutées \n{message}", color=0x33CAFF)
         await ctx.send(embed=embed)
     
 @bot.command()
 async def show(ctx):
     serveur = str(ctx.guild.name)
-    fichier = [File(str(f"stockage/citations/citation_{serveur}")+'.csv')]
+    fichier = [File(str(f"citations/citation_{serveur}")+'.csv')]
     
     embed = Embed(title="citations", description="voici les citations\n " , File = fichier  , color=0x33CAFF)
     await ctx.send(embed=embed)
@@ -543,7 +542,7 @@ async def show(ctx):
 
 
 def verif(auteur) :
-    fichier = reader(open("stockage/personne.csv"))
+    fichier = reader(open("personne.csv"))
     
     for ligne in fichier :
         
@@ -565,7 +564,7 @@ async def anniv(ctx,jour = None ,mois = None) :
         else :
             if 1<=int(jour)<=31 and 1<=int(mois)<=12 :
             
-                addincsv("stockage/personne.csv",auteur.id)
+                addincsv("personne.csv",auteur.id)
                 embed = Embed(title="anniversaire", description=f"la date ajoutée est le {jour}/{mois}", color=0x33CAFF)
                 await ctx.send(embed = embed)
                 données = [auteur.id,[f" est né(e) le {jour}"]]
@@ -614,7 +613,7 @@ async def tableau(ctx) :
    
     
     for i in range(len(noms_janvier)) :
-        a=noms_janvier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_janvier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         personne = bot.get_user(int(a))
         b=jour_janvier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_janvier = message_janvier + str(personne) + str(b) + str("""
@@ -635,7 +634,7 @@ async def tableau(ctx) :
     print(noms_fevrier)
     
     for i in range(len(noms_fevrier)) :
-        a=noms_fevrier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_fevrier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_fevrier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_fevrier = message_fevrier + str(personne) + str(b) + str("""
@@ -656,7 +655,7 @@ async def tableau(ctx) :
     print(noms_mars)
     
     for i in range(len(noms_mars)) :
-        a=noms_mars[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_mars[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_mars[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_mars = message_mars + str(personne) + str(b) + str("""
@@ -677,7 +676,7 @@ async def tableau(ctx) :
     print(noms_avril)
     
     for i in range(len(noms_avril)) :
-        a=noms_avril[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_avril[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_avril[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_avril = message_avril + str(personne) + str(b) + str("""
@@ -703,7 +702,7 @@ async def tableau(ctx) :
     print(noms_mai)
     
     for i in range(len(noms_mai)) :
-        a=noms_mai[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_mai[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_mai[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_mai = message_mai + str(personne) + str(b) + str("""
@@ -724,7 +723,7 @@ async def tableau(ctx) :
     print(noms_juin)
     
     for i in range(len(noms_juin)) :
-        a=noms_juin[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_juin[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_juin[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_juin = message_juin + str(personne) + str(b) + str("""
@@ -745,7 +744,7 @@ async def tableau(ctx) :
     print(noms_juillet)
     
     for i in range(len(noms_juillet)) :
-        a=noms_juillet[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_juillet[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_juillet[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_juillet = message_juillet + str(personne) + str(b) + str("""
@@ -766,7 +765,7 @@ async def tableau(ctx) :
     print(noms_aout)
     
     for i in range(len(noms_aout)) :
-        a=noms_aout[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_aout[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_aout[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_aout = message_aout + str(personne) + str(b) + str("""
@@ -794,7 +793,7 @@ async def tableau(ctx) :
     print(noms_septembre)
     
     for i in range(len(noms_septembre)) :
-        a=noms_septembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_septembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_septembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_septembre = message_septembre + str(personne) + str(b) + str("""
@@ -815,7 +814,7 @@ async def tableau(ctx) :
     print(noms_octobre)
     
     for i in range(len(noms_octobre)) :
-        a=noms_octobre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_octobre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_octobre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_octobre = message_octobre + str(personne) + str(b) + str("""
@@ -836,7 +835,7 @@ async def tableau(ctx) :
     print(noms_novembre)
     
     for i in range(len(noms_novembre)) :
-        a=noms_novembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_novembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_novembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_novembre = message_novembre + str(personne) + str(b) + str("""
@@ -857,7 +856,7 @@ async def tableau(ctx) :
     print(noms_decembre)
     
     for i in range(len(noms_decembre)) :
-        a=noms_decembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
+        personne=noms_decembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         
         b=jour_decembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_decembre = message_decembre + str(personne) + str(b) + str("""
@@ -998,7 +997,7 @@ async def stuff(ctx,*args) :
                 a = str(stuf)
 
                 a = a.replace('[', '').replace(']', '').replace(',', '').replace("'", '').replace('newline', '''
-                ''').replace('         ','')
+''').replace('         ','')
                 
                 embed = Embed(title = "stuff" , description = f"{a}" , color = 0x33CAFF)
 
@@ -1349,7 +1348,7 @@ def verif_code(code) :
 
 @bot.command()
 async def add(ctx):
-    fichier = reader(open("stockage/code_amis.csv"))
+    fichier = reader(open("code_amis.csv"))
     code_amis = ""
     test = False
     cpt_lignes = 0
@@ -1403,7 +1402,7 @@ async def add(ctx):
         
                 if reaction.emoji == "✅" :
             
-                    await ctx.send(embed = embed_valid) and addincsv("stockage/code_amis.csv" , ajout)
+                    await ctx.send(embed = embed_valid) and addincsv("code_amis.csv" , ajout)
             
         
             except:
@@ -1414,7 +1413,7 @@ async def add(ctx):
             await ctx.send(embed = embed_invalid)
     else :
         
-        fichier = reader(open("stockage/code_amis.csv"))
+        fichier = reader(open("code_amis.csv"))
         code = ""
         for ligne in fichier :
             tempo =  str(ligne[0]).replace("'", "").replace("[", "").replace("]", "")
@@ -1480,8 +1479,8 @@ async def add(ctx):
                             if reaction.emoji == "✅" :
                             
                                 
-                                suprligne("stockage/code_amis.csv",cpt_lignes-1) 
-                                addincsv("stockage/code_amis.csv" , ajout) 
+                                suprligne("code_amis.csv",cpt_lignes-1) 
+                                addincsv("code_amis.csv" , ajout) 
                                 await ctx.send(embed = embed_valid)
                    
                 
@@ -1505,7 +1504,7 @@ async def code(ctx , membre : Member = None) :
 
 
 
-    fichier = reader(open("stockage/code_amis.csv"))
+    fichier = reader(open("code_amis.csv"))
 
     a=False
 
@@ -1617,72 +1616,9 @@ async def delete(ctx, number: int):
         await message.delete()
     
     await ctx.send(f"{number} messages ont été supprimés")
+       
 
 
-
-
-@bot.command(name="set_role", pass_context=True)
-@commands.has_permissions(administrator=True)
-async def set_role(ctx , role , react) :
-
-    print(role)
-
-    channel = ""
-    s = False
-    for salon in ctx.guild.text_channels :
-        if salon.name == "role" or salon.name == "rôle" or salon.name == "roles" or salon.name == "rôles":
-            channel = salon
-            s = True
-            break
-    
-    role_add =""
-    r=False
-    for roles in ctx.guild.roles :
-        
-        if str(roles.id) in role :
-            role_add = roles
-            r = True
-            break
-
-    a=""
-
-    if s==False :    
-        await ctx.send("vous devez créer un salon role")
-
-
-    else :
-        for i in str(role) :
-            if i == "@" :
-        
-                a = str(role).replace("@","")
-            else :
-                a = role
-        print(a)
-        role_add = await ctx.guild.create_role(name = a)
-    
-        embed_mess = Embed(description = f"Ajoutez la réaction {react} si vous voulez le role {a}" , color = 0x33CAFF)
-        message = await bot.get_channel(channel.id).send(embed = embed_mess)
-        await message.add_reaction(react)
-
-        def checkEmoji(reaction, user):
-    	    return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == react  )
-
-        
-        reaction, user = await bot.wait_for("reaction_add", timeout = None, check = checkEmoji)
-        liste = []
-        if reaction.emoji == react :
-                    
-                
-            async for user in reaction.users():
-                liste.append(user)
-                    
-            personne = liste[1]
-            print(liste)
-
-            await personne.add_roles(role_add)
-
-            liste.pop(1)
-            print(liste)
 
 @bot.command()
 async def syracuse(ctx,nombre : int) :
@@ -2035,9 +1971,8 @@ async def queue(ctx) :
         await ctx.send("il n'y a pas d'autres videos")
     
 
-                            
-token = os.environ['token']
-token1 = os.environ['token1']
 
+                            
+token1 = "ODUwMzI0NDMzNTc1MDg0MDQy.YLoEVw.AGAt3EROOxb9KLqhpVsS7HtVIzA"
 
 bot.run(token1)
