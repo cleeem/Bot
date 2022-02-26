@@ -14,7 +14,7 @@ client = Client()
 intents = Intents.default()
 intents.members = True
 
-bot = commands.Bot(command_prefix=";", description="Bot de clem#1777", intents=intents)
+bot = commands.Bot(command_prefix="$", description="Bot de clem#1777", intents=intents)
 
 bot.remove_command('help')
 
@@ -360,9 +360,7 @@ async def stop(ctx) :
 #ajoute le role membre a tout les membres
 @bot.command()
 async def verif_roles(ctx) :
-
      : ajoute le role membre a tout le monde
-
     membres = ctx.guild.members
     roles_serv = ctx.guild.roles
     embed = Embed(title = "vérification des rôles" , description = "la vérification est bien enclenchée" , color = 0x33CAFF)
@@ -370,7 +368,6 @@ async def verif_roles(ctx) :
     for role in roles_serv :
         if role.name == "Membre" or role.name == "membre":
             role_membre = role
-
     for membre in membres :
         if not "{Bot}" in membre.roles : 
             print(membre.roles)
@@ -894,8 +891,6 @@ async def stuff(ctx,*args) :
         def checkEmoji(reaction, user):
             return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "⏺" or str(reaction.emoji) == "⏹")
 
-
-
         try:
             reaction, user = await bot.wait_for("reaction_add", timeout = 45, check = checkEmoji)
 
@@ -1135,69 +1130,79 @@ async def stuff(ctx,*args) :
                     await message.add_reaction("✅")
                     await message.add_reaction("❌")
 
-                    def checkEmoji(reaction, user):
-                        return ctx.message.author == user and message.id == reaction.message.id and (
-                                str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
+                    try :
 
-                    reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
-                    
+                        def checkEmoji(reaction, user):
+                            return ctx.message.author == user and message.id == reaction.message.id and (
+                                    str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
 
-                    if reaction.emoji == "✅":
-                        await ctx.send("choississez un nom pour votre stuff")
-                        nom_stuff = await bot.wait_for("message", timeout=45 )
-                        nom_stuff = nom_stuff.content
-                        nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
-                        id = ctx.author.id
+                        reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
+                        
 
-                        if not exists(f"stuffs/{id}") :
+                        if reaction.emoji == "✅":
+                            def checkMessage(message):
+                                return message.author == ctx.message.author and ctx.message.channel == message.channel
                             
-                            os.mkdir(f"stuffs/{id}")
-                            fs.save(id,nom_stuff)
-                            with open(f"stuffs/{id}/{id}","wb") as csvfile:
-                                filewriter = writer(csvfile, delimiter=',', quotechar='|', quoting=QUOTE_MINIMAL)
+                            await ctx.send("choississez un nom pour votre stuff")
+                            nom_stuff = await bot.wait_for("message", timeout=45 , check = checkMessage)
+                            nom_stuff = nom_stuff.content
+                            nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
+                            id = ctx.author.id
 
-                            addincsv(f"stuffs/{id}/{id}.csv",nom_stuff,False,",")
-                            addincsv(f"stuffs/{id}/{id}.csv",a)
-                            fs.clear()
-                            await ctx.send(f"sauvegarde éffectuée")
-
-
-                        else :
-                            
-                            if not verif_stuff(id,nom_stuff) :
-                                message = await ctx.send(f"Ce nom de stuff existe déjà \Voulez vous remplacer l'image du stuff {nom_stuff}")
-                                await message.add_reaction("✅")
-                                await message.add_reaction("❌")
-
-                                def checkEmoji(reaction, user):
-                                    return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
-
-                                reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
-                    
-
-                                if reaction.emoji == "✅":
-                                    await ctx.send("Stuff sauvegardé")
-                                    fs.save(id,nom_stuff)
+                            if not exists(f"stuffs/{id}") :
                                 
-                                elif reaction.emoji == "❌" :
-                                    await ctx.send("D'accord j'annule la sauvegarde")
-                                    fs.clear()
-                            
-                            
-                            else :
+                                os.mkdir(f"stuffs/{id}")
                                 fs.save(id,nom_stuff)
-                                addincsv(f"stuffs/{id}/{id}.csv",nom_stuff,False,",")
-                                addincsv(f"stuffs/{id}/{id}.csv",a)
+                                with open(f"stuffs/{id}/{id}","wb") as csvfile:
+                                    filewriter = writer(csvfile, delimiter=',', quotechar='|', quoting=QUOTE_MINIMAL)
 
-                                fs.clear()
+                                addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
                                 await ctx.send(f"sauvegarde éffectuée")
+                                fs.clear()
 
-                    elif reaction.emoji == "❌" :
-                        await message.delete()
+
+                            else :
+                                
+                                if not verif_stuff(id,nom_stuff) :
+                                    message = await ctx.send(f"Ce nom de stuff existe déjà \nVoulez vous remplacer l'image du stuff {nom_stuff}")
+                                    await message.add_reaction("✅")
+                                    await message.add_reaction("❌")
+
+                                    try :
+                                        def checkEmoji(reaction, user):
+                                            return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
+
+                                        reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
+
+                                        if reaction.emoji == "✅":
+                                            await ctx.send("Stuff sauvegardé")
+                                            fs.save(id,nom_stuff)
+                                        
+                                        elif reaction.emoji == "❌" :
+                                            await ctx.send("D'accord j'annule la sauvegarde")
+                                            fs.clear()
+                                    
+                                    except :
+                                        embed = Embed(description = f"Les 30 secondes sont passées")
+                                        await ctx.send(embed = embed)
+                                
+                                else :
+                                    fs.save(id,nom_stuff)
+                                    addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
+                                    await ctx.send(f"sauvegarde éffectuée")
+                                    fs.clear()
+                                
+
+                        elif reaction.emoji == "❌" :
+                            await message.delete()
                     
-                    else :
-                        pass
-                                            
+                        else :
+                            pass
+                    except :
+                        embed = Embed(description = f"Les 30 secondes sont passées")
+                        await ctx.send(embed = embed)
+
+
                 else:
                     embed = Embed(title="bonus inconnu", description='le bonus n°' + str(i) + ' est introuvable',
                                   color=0x33CAFF)
@@ -1206,7 +1211,8 @@ async def stuff(ctx,*args) :
                     for i in range(1, 12):
                         fs.clear(i)
         except :
-            pass
+            embed = Embed(description = f"Les 45 secondes sont passées")
+            await ctx.send(embed = embed)
 
 def verif_stuff(nom,nom_stuff) :
     fichier = reader(open(f"stuffs/{nom}/{nom}.csv"))
@@ -1236,7 +1242,23 @@ async def mes_stuffs(ctx) :
     except :
         await ctx.send(f"il faut enregistrer vos stuffs avec la commande $stuff")
 
+@bot.command()
+async def mes_stuff(ctx) :
+    id = ctx.author.id
+    membre = ctx.author
+    try :
+        fichier = reader(open(f"stuffs/{id}/{id}.csv"))
+        
+        await ctx.send(f"le reste se passe en mp")
 
+        for ligne in fichier:
+            a = str(ligne[0])
+            url = f"stuffs/{id}/{a}"
+            await membre.send(f"votre stuff {a}")
+            await membre.send(file = File(rf"stuffs/{id}/{a}.png"))
+
+    except :
+        await ctx.send(f"il faut enregistrer vos stuffs avec la commande $stuff")
 
 @bot.command()
 async def rename(ctx) :
@@ -1247,42 +1269,73 @@ async def rename(ctx) :
     
     await membre.send(f"Entrez le nom du stuff voulez vous renomer\n(Faites la commande $mes_stuffs pour tous les voir)")
     
-    nom_stuff = await bot.wait_for("message", timeout=60 )
+    def checkMessage(message):
+	    return message.author == ctx.message.author and ctx.message.channel == message.channel
+
+    nom_stuff = await bot.wait_for("message", timeout=60 ,check = checkMessage)
     nom_stuff = nom_stuff.content
     nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
 
     fichier = reader(open(f"stuffs/{id}/{id}.csv"))
-
+    print("oui")
     i=0
     for ligne in fichier :
         if str(ligne[0]) == str(nom_stuff) :
             message = await membre.send(f"vous voules renomer ce stuff : {ligne[0]}")
             await message.add_reaction("✅")
             await message.add_reaction("❌")
+            try :
+                def checkEmoji(reaction, user):
+                    return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")                        
+                        
+                reaction, user = await bot.wait_for("reaction_add", timeout=30, check=checkEmoji)
+                        
+                if reaction.emoji == "✅":
+                    vieux = ligne[0]
 
-            def checkEmoji(reaction, user):
-                return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")                        
+                    await membre.send("Entrez le nouveau nom")
+                    nouveau_nom = await bot.wait_for("message", timeout=60 ,check = checkMessage)
+                    nouveau_nom = nouveau_nom.content
+                    nouveau_nom = str(nouveau_nom).replace(" ","_").replace("+","_")
                     
-            reaction, user = await bot.wait_for("reaction_add", timeout=30, check=checkEmoji)
-                    
-            if reaction.emoji == "✅":
-                vieux = ligne[0]
+                    if not verif_stuff(id,nouveau_nom) :
+                        message = await ctx.send(f"Ce nom de stuff existe déjà \nVoulez vous remplacer l'image du stuff {nouveau_nom} par {nom_stuff}")
+                        await message.add_reaction("✅")
+                        await message.add_reaction("❌")
 
-                await membre.send("Entrez le nouveau nom")
-                nouveau_nom = await bot.wait_for("message", timeout=60 )
-                nouveau_nom = nouveau_nom.content
-                nouveau_nom = str(nouveau_nom).replace(" ","_").replace("+","_")
-                
-                ancien = rf"stuffs/{id}/{vieux}.png"
-                new_name = rf"stuffs/{id}/{nouveau_nom}.png"
-                os.rename(ancien,new_name)
-                suprligne(f"stuffs/{id}/{id}.csv",i)
-                addincsv(f"stuffs/{id}/{id}.csv",nouveau_nom)
-                await membre.send(f"changement de {vieux} à {nouveau_nom} éffecué")
-                break
+                        try :
+                            def checkEmoji(reaction, user):
+                                return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
+
+                            reaction, user = await bot.wait_for("reaction_add", timeout=30, check=checkEmoji)
+
+                            if reaction.emoji == "✅":
+                                os.remove(f"stuffs/{id}/{vieux}.png")
+                                await ctx.send(f"Votre stuff {vieux} a été renommé en {nouveau_nom} et l'autre supprimé")
+                                
+                                        
+                            elif reaction.emoji == "❌" :
+                                await ctx.send("D'accord j'annule la sauvegarde")
+                                break
+                        except :
+                            embed = Embed(description = f"Les 30 secondes sont passées")
+                            await membre.send(embed = embed)
+                        
+                    else :
+                        ancien = rf"stuffs/{id}/{vieux}.png"
+                        new_name = rf"stuffs/{id}/{nouveau_nom}.png"
+                        os.rename(ancien,new_name)
+                        suprligne(f"stuffs/{id}/{id}.csv",i)
+                        addincsv(f"stuffs/{id}/{id}.csv",nouveau_nom)
+                        await membre.send(f"changement de {vieux} à {nouveau_nom} éffecué")
+                        break
             
-            elif reaction.emoji == "❌" :
-                await membre.send(f"D'accord, il doit y avoir une erreur")
+                elif reaction.emoji == "❌" :
+                    await membre.send(f"D'accord, il doit y avoir une erreur")
+            except :
+                embed = Embed(description = f"Les 30 secondes sont passées")
+                await membre.send(embed = embed)
+
         i+=1
 
 
@@ -1297,7 +1350,18 @@ async def access(ctx,stuff) :
     
     except :
         embed_erreur = Embed(description = f"Il y a eu une erreur, veuillez vérifier le nom du stuff que vous vouliez voir via la commande mus_stuffs")
-        await membre.send(embed = embed)
+        await membre.send(embed = embed_erreur)
+
+
+@bot.command()
+async def suppr(ctx,stuff) :
+    id= ctx.author.id
+    try :
+        os.remove(rf"stuffs/{id}/{stuff}.png")
+    except :
+        embed_erreur = Embed(description = f"Il y a eu une erreur, veuillez vérifier le nom du stuff que vous vouliez voir via la commande mus_stuffs")
+        await ctx.send(embed = embed_erreur)
+
 
 @bot.command()
 async def scrim(ctx,arg1) :
@@ -2139,6 +2203,6 @@ async def queue(ctx) :
         await ctx.send(musics[ctx.guild])
     else :
         await ctx.send("il n'y a pas d'autres videos")
-    
-                            
-bot.run(token1)
+
+
+bot.run(token)
