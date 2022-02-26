@@ -14,7 +14,7 @@ client = Client()
 intents = Intents.default()
 intents.members = True
 
-bot = commands.Bot(command_prefix=";", description="Bot de clem#1777", intents=intents)
+bot = commands.Bot(command_prefix="$", description="Bot de clem#1777", intents=intents)
 
 bot.remove_command('help')
 
@@ -884,7 +884,7 @@ async def stuff(ctx,*args) :
 
     else :
 
-        embed_message = Embed(description = f" sous quelle forme voulez vous votre stuff? ⏺ : emoji ou ⏹ : image\nNote : l'image peut prendre du temps à s'afficher " , color = 0x33CAFF)
+        embed_message = Embed(description = f" sous quelle forme voulez vous votre stuff? ⏺ : emoji ou ⏹ : image\nNote : l'image peut prendre du temps à s'afficher \nVous pouvez également sauvegardé ce stuff si vous choississez l'image" , color = 0x33CAFF)
 
         message = await ctx.send(embed = embed_message)
         await message.add_reaction("⏺")
@@ -893,7 +893,6 @@ async def stuff(ctx,*args) :
 
         def checkEmoji(reaction, user):
             return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "⏺" or str(reaction.emoji) == "⏹")
-
 
 
         try:
@@ -1136,30 +1135,27 @@ async def stuff(ctx,*args) :
                     await message.add_reaction("❌")
 
                     def checkEmoji(reaction, user):
-                        return ctx.message.author == user and message.id == reaction.message.id and (
-                                str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
+                        return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
 
                     reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
                     
 
                     if reaction.emoji == "✅":
                         await ctx.send("choississez un nom pour votre stuff")
-                        nom_stuff = await bot.wait_for("message", timeout=45, )
+                        nom_stuff = await bot.wait_for("message", timeout=45 )
                         nom_stuff = nom_stuff.content
                         nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
                         id = ctx.author.id
 
                         if not exists(f"stuffs/{id}") :
-                            
                             os.mkdir(f"stuffs/{id}")
                             fs.save(id,nom_stuff)
                             with open(f"stuffs/{id}/{id}","wb") as csvfile:
                                 filewriter = writer(csvfile, delimiter=',', quotechar='|', quoting=QUOTE_MINIMAL)
-
                             addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
-                            fs.clear()
                             await ctx.send(f"sauvegarde éffectuée")
-
+                            fs.clear()
+                            
 
                         else :
                             
@@ -1175,8 +1171,9 @@ async def stuff(ctx,*args) :
                     
 
                                 if reaction.emoji == "✅":
-                                    await ctx.send("Stuff sauegardé")
+                                    await ctx.send("Stuff sauvegardé")
                                     fs.save(id,nom_stuff)
+                                    fs.clear()
                                 
                                 elif reaction.emoji == "❌" :
                                     await ctx.send("D'accord j'annule la sauvegarde")
@@ -1186,8 +1183,9 @@ async def stuff(ctx,*args) :
                             else :
                                 fs.save(id,nom_stuff)
                                 addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
-                                fs.clear()
                                 await ctx.send(f"sauvegarde éffectuée")
+                                fs.clear()
+
                     elif reaction.emoji == "❌" :
                         await message.delete()
                     
@@ -2073,7 +2071,4 @@ async def queue(ctx) :
         await ctx.send("il n'y a pas d'autres videos")
     
 
-                            
-token1 = "ODUwMzI0NDMzNTc1MDg0MDQy.YLoEVw.AGAt3EROOxb9KLqhpVsS7HtVIzA"
-
-bot.run(token1)
+bot.run(token)
