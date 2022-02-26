@@ -1140,64 +1140,68 @@ async def stuff(ctx,*args) :
                         
 
                         if reaction.emoji == "✅":
-                            def checkMessage(message):
-                                return message.author == ctx.message.author and ctx.message.channel == message.channel
                             
-                            await ctx.send("choississez un nom pour votre stuff")
-                            nom_stuff = await bot.wait_for("message", timeout=45 , check = checkMessage)
-                            nom_stuff = nom_stuff.content
-                            nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
-                            id = ctx.author.id
-
-                            if not exists(f"stuffs/{id}") :
+                            try :
+                                def checkMessage(message):
+                                    return message.author == ctx.message.author and ctx.message.channel == message.channel
                                 
-                                os.mkdir(f"stuffs/{id}")
-                                fs.save(id,nom_stuff)
-                                with open(f"stuffs/{id}/{id}","wb") as csvfile:
-                                    filewriter = writer(csvfile, delimiter=',', quotechar='|', quoting=QUOTE_MINIMAL)
+                                await ctx.send("choississez un nom pour votre stuff")
+                                nom_stuff = await bot.wait_for("message", timeout=45 , check = checkMessage)
+                                nom_stuff = nom_stuff.content
+                                nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
+                                id = ctx.author.id
 
-                                addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
-                                await ctx.send(f"sauvegarde éffectuée")
-                                fs.clear()
-
-
-                            else :
-                                
-                                if not verif_stuff(id,nom_stuff) :
-                                    message = await ctx.send(f"Ce nom de stuff existe déjà \nVoulez vous remplacer l'image du stuff {nom_stuff}")
-                                    await message.add_reaction("✅")
-                                    await message.add_reaction("❌")
-
-                                    try :
-                                        def checkEmoji(reaction, user):
-                                            return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
-
-                                        reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
-
-                                        if reaction.emoji == "✅":
-                                            await ctx.send("Stuff sauvegardé")
-                                            fs.save(id,nom_stuff)
-                                        
-                                        elif reaction.emoji == "❌" :
-                                            await ctx.send("D'accord j'annule la sauvegarde")
-                                            fs.clear()
+                                if not exists(f"stuffs/{id}") :
                                     
-                                    except :
-                                        embed = Embed(description = f"Les 30 secondes sont passées")
-                                        await ctx.send(embed = embed)
-                                
-                                else :
+                                    os.mkdir(f"stuffs/{id}")
                                     fs.save(id,nom_stuff)
+                                    with open(f"stuffs/{id}/{id}","wb") as csvfile:
+                                        filewriter = writer(csvfile, delimiter=',', quotechar='|', quoting=QUOTE_MINIMAL)
+
                                     addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
                                     await ctx.send(f"sauvegarde éffectuée")
                                     fs.clear()
-                                
+
+
+                                else :
+                                    
+                                    if not verif_stuff(id,nom_stuff) :
+                                        message = await ctx.send(f"Ce nom de stuff existe déjà \nVoulez vous remplacer l'image du stuff {nom_stuff}")
+                                        await message.add_reaction("✅")
+                                        await message.add_reaction("❌")
+
+                                        try :
+                                            def checkEmoji(reaction, user):
+                                                return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
+
+                                            reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
+
+                                            if reaction.emoji == "✅":
+                                                await ctx.send("Stuff sauvegardé")
+                                                fs.save(id,nom_stuff)
+                                            
+                                            elif reaction.emoji == "❌" :
+                                                await ctx.send("D'accord j'annule la sauvegarde")
+                                                fs.clear()
+                                        
+                                        except :
+                                            embed = Embed(description = f"Les 30 secondes sont passées")
+                                            await ctx.send(embed = embed)
+                                    
+                                    else :
+                                        fs.save(id,nom_stuff)
+                                        addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
+                                        await ctx.send(f"sauvegarde éffectuée")
+                                        fs.clear()
+                            except :
+                                pass
 
                         elif reaction.emoji == "❌" :
                             await message.delete()
                     
                         else :
                             pass
+
                     except :
                         embed = Embed(description = f"Les 30 secondes sont passées")
                         await ctx.send(embed = embed)
@@ -1356,8 +1360,18 @@ async def access(ctx,stuff) :
 @bot.command()
 async def suppr(ctx,stuff) :
     id= ctx.author.id
+    
     try :
-        os.remove(rf"stuffs/{id}/{stuff}.png")
+        fichier = reader(open(f"stuffs/{id}/{id}.csv"))
+        i=0
+        for ligne in fichier:
+            print(ligne)
+            a = str(ligne[0])
+            if a==stuff :
+                suprligne(f"stuffs/{id}/{id}.csv",i)
+                break 
+
+            i=+1
     except :
         embed_erreur = Embed(description = f"Il y a eu une erreur, veuillez vérifier le nom du stuff que vous vouliez voir via la commande mus_stuffs")
         await ctx.send(embed = embed_erreur)
@@ -2203,6 +2217,5 @@ async def queue(ctx) :
         await ctx.send(musics[ctx.guild])
     else :
         await ctx.send("il n'y a pas d'autres videos")
-
-
+    
 bot.run(token)
