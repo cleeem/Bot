@@ -2814,8 +2814,6 @@ def addincsv(url_file,objet,newline =True, delimiter =  None):
 
 def save(id,nom_stuff) :
     img = Image.open("images_bot/emote_stuff/blanc_resultat.png")
-
-    print(nom_stuff)
             
     img.save(f"stuffs/{id}/{nom_stuff}.png")
 
