@@ -1359,22 +1359,28 @@ async def access(ctx,stuff) :
 
 @bot.command()
 async def suppr(ctx,stuff) :
-    id= ctx.author.id
-    
+    id = ctx.author.id
+    membre = ctx.author
     try :
+        res = False
         fichier = reader(open(f"stuffs/{id}/{id}.csv"))
-        i=0
-        for ligne in fichier:
-            print(ligne)
-            a = str(ligne[0])
-            if a==stuff :
-                suprligne(f"stuffs/{id}/{id}.csv",i)
-                break 
+        for ligne in fichier :
+            if str(ligne[0])==str(stuff) :
+                suprligne(f"stuffs/{id}/{id}.csv",fichier.line_num-1)
+                os.remove(f"stuffs/{id}/{stuff}.png")
+                await membre.send(f"J'ai bien supprimé le stuff {stuff}")
+                res = True
+        
+        if fichier.line_num == 0 :
+            await membre.send("Vous avez supprimé votre dernier stuff")
 
-            i=+1
+        if not res :
+            await membre.send(f"veuillez vérifier vos stuffs via la commande 'mes_stuffs'")  
+
+
     except :
-        embed_erreur = Embed(description = f"Il y a eu une erreur, veuillez vérifier le nom du stuff que vous vouliez voir via la commande mus_stuffs")
-        await ctx.send(embed = embed_erreur)
+        await membre.send(f"veuillez vérifier vos stuffs via la commande 'mes_stuffs'")  
+
 
 
 @bot.command()
