@@ -8,6 +8,11 @@ from csv import *
 from discord.utils import get
 from csv import *
 import fichier_stuff as fs
+import pronotepy
+import datetime
+import time
+
+
 
 client = Client()
 
@@ -25,6 +30,97 @@ async def on_ready():
     print("Ready !")
     activity = Game(name="$help", type=1)
     await bot.change_presence(status=Status.online, activity=activity)
+
+
+def addincsv(url_file,objet,newline =True, delimiter =  None):
+    csv = open(url_file,'a',encoding='utf-8')
+    if newline:
+        csv.write((str(objet)+'\n'))
+    else:
+        csv.write(str(objet))
+        csv.write(str(delimiter))
+    csv.close()
+
+
+@bot.command()
+async def register(ctx) :
+    id = ctx.author.id
+    membre = ctx.author
+    if not exists(f"noms/{id}.csv") :
+        await ctx.send("la suite en dm")
+        await membre.send("IL FAUT QUE CE SOIT VOS IDENTIFIANTS PRONOTE ET NON PAS ENT")
+        def checkMessage(message):
+            return message.author == ctx.message.author and "Direct" in str(message.channel)
+        
+        await membre.send("entrez votre identifiant")
+        
+        ident = await bot.wait_for("message", timeout=60 ,check = checkMessage)
+        ident = ident.content
+        print(ident)
+        addincsv(f"noms/{id}.csv",ident)
+        await membre.send("ok")
+
+
+        await membre.send("entrez votre mot de passe")
+        mdp = await bot.wait_for("message", timeout=60 ,check = checkMessage)
+        mdp = mdp.content
+        print(mdp)
+        addincsv(f"noms/{id}.csv",mdp)
+        await membre.send("ok")
+        
+        #await membre.send("timeout")
+        await membre.send("sauvegarde effectuée")
+
+    else :
+        await ctx.send("already registered")
+
+@bot.command()
+async def devoirs(ctx) :
+    id = ctx.author.id
+    membre = ctx.author
+    if not exists(f"noms/{id}.csv") :
+        await membre.send("veuillez faire la commande ;register pour pouvoir vous connecter")
+    
+    else :
+        fichier = reader(open(f"noms/{id}.csv"))
+        liste = []
+        for ligne in fichier :
+            liste.append(ligne)
+
+        ident = str(liste[0]).replace("[","").replace("]","").replace("'","")
+        mdp = str(liste[1]).replace("[","").replace("]","").replace("'","")
+
+        client = pronotepy.Client('https://0312696m.index-education.net/pronote/eleve.html?login=true',
+                            username=ident,
+                            password=mdp)
+        res=""
+        if client.logged_in:
+            
+            today = datetime.date.today()
+            homework = client.homework(today) # get list of homework for today and later
+
+            for hw in homework: # iterate through the list
+                res = res + f"\n \n{hw.subject.name} pour le {hw.date}: \n{hw.description}"
+                #print(f"({hw.subject.name}): {hw.description}")
+            
+            await ctx.send("je vous envoie ça en dm")
+            embed = Embed(title = "devoirs", description = res ,color = 0x33CAFF)
+            await membre.send(embed = embed)
+
+        else: 
+            await membre.send("Failed to log in")
+            exit()
+
+
+@bot.command()
+async def change(ctx) :
+    id = ctx.author.id
+    membre = ctx.author
+    os.remove(f"noms/{id}.csv")
+    await membre.send("vous allez pouvoir re-entrer vos identifiants")
+    await register(ctx)
+
+
 
 
 # commande bonjour
