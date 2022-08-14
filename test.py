@@ -1,7 +1,4 @@
-from genericpath import exists
 import os
-from venv import create
-import discord.ui as bt
 from discord import *
 from discord.ext import commands
 from random import *
@@ -9,9 +6,6 @@ from csv import *
 from discord.utils import get
 from csv import *
 import fichier_stuff as fs
-import pronotepy
-import datetime
-import time
 
 client = Client()
 
@@ -23,240 +17,12 @@ bot = commands.Bot(command_prefix="$", description="Bot de clem#1777", intents=i
 bot.remove_command('help')
 
 
+
 @bot.event
 async def on_ready():
     print("Ready !")
     activity = Game(name="$help", type=1)
     await bot.change_presence(status=Status.online, activity=activity)
-
-
-def addincsv(url_file,objet,newline =True, delimiter =  None):
-    csv = open(url_file,'a',encoding='utf-8')
-    if newline:
-        csv.write((str(objet)+'\n'))
-    else:
-        csv.write(str(objet))
-        csv.write(str(delimiter))
-    csv.close()
-
-
-@bot.command()
-async def register(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    if not exists(f"noms/{id}.csv") :
-        await ctx.send("la suite en dm")
-        await membre.send("IL FAUT QUE CE SOIT VOS IDENTIFIANTS PRONOTE ET NON PAS ENT")
-        def checkMessage(message):
-            return message.author == ctx.message.author and "Direct" in str(message.channel)
-        
-        await membre.send("entrez votre identifiant")
-        
-        ident = await bot.wait_for("message", timeout=60 ,check = checkMessage)
-        ident = ident.content
-        print(ident)
-        addincsv(f"noms/{id}.csv",ident)
-        await membre.send("ok")
-
-
-        await membre.send("entrez votre mot de passe")
-        mdp = await bot.wait_for("message", timeout=60 ,check = checkMessage)
-        mdp = mdp.content
-        print(mdp)
-        addincsv(f"noms/{id}.csv",mdp)
-        await membre.send("ok")
-        
-        #await membre.send("timeout")
-        await membre.send("sauvegarde effectuée")
-
-    else :
-        await ctx.send("already registered")
-
-@bot.command()
-async def devoirs(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    if not exists(f"noms/{id}.csv") :
-        await membre.send("veuillez faire la commande ;register pour pouvoir vous connecter")
-    
-    else :
-        fichier = reader(open(f"noms/{id}.csv"))
-        liste = []
-        for ligne in fichier :
-            liste.append(ligne)
-
-        ident = str(liste[0]).replace("[","").replace("]","").replace("'","")
-        mdp = str(liste[1]).replace("[","").replace("]","").replace("'","")
-
-        client = pronotepy.Client('https://0312696m.index-education.net/pronote/eleve.html?login=true',
-                            username=ident,
-                            password=mdp)
-        res=""
-        if client.logged_in:
-            
-            today = datetime.date.today()
-            homework = client.homework(today) # get list of homework for today and later
-
-            for hw in homework: # iterate through the list
-                res = res + f"\n \n{hw.subject.name} pour le {hw.date}: \n{hw.description}"
-                #print(f"({hw.subject.name}): {hw.description}")
-            
-            await ctx.send("je vous envoie ça en dm")
-            embed = Embed(title = "devoirs", description = res ,color = 0x33CAFF)
-            await membre.send(embed = embed)
-
-        else: 
-            await membre.send("Failed to log in")
-            exit()
-
-
-@bot.command()
-async def notes(ctx):
-    id = ctx.author.id
-    membre = ctx.author
-    liste = []
-    if not exists(f"noms/{id}.csv"):
-        await membre.send("veuillez faire la commande ;register pour pouvoir vous connecter")
-
-    else:
-        fichier = reader(open(f"noms/{id}.csv"))
-        for ligne in fichier:
-            liste.append(ligne)
-
-        ident = str(liste[0]).replace("[", "").replace("]", "").replace("'", "")
-        mdp = str(liste[1]).replace("[", "").replace("]", "").replace("'", "")
-
-        client = pronotepy.Client('https://0312696m.index-education.net/pronote/eleve.html?login=true',
-                                  username=ident,
-                                  password=mdp)
-        res = ""
-        res2 = ""
-        if client.logged_in:
-
-            periods = client.periods
-
-            for period in periods:
-                for grade in period.grades:  # iterate over all the grades
-
-                    if not len(res) >= 4000:
-                        res = res + (f'{grade.grade}/{grade.out_of} le {grade.date} en {grade.subject.name} \n')
-
-                    else:
-
-                        res2 = res2 + (f'{grade.grade}/{grade.out_of} le {grade.date} en {grade.subject.name} \n')
-
-            await ctx.send("je vous envoie ça en dm")
-
-            if res2 != "":
-                embed2 = Embed(title="devoirs", description=res2, color=0x33CAFF)
-                embed = Embed(title="devoirs", description=res, color=0x33CAFF)
-                await membre.send(embed=embed)
-                await membre.send(embed=embed2)
-            else:
-                embed = Embed(title="devoirs", description=res, color=0x33CAFF)
-                await membre.send(embed=embed)
-
-        else:
-            await membre.send("Failed to log in")
-            exit()
-
-
-@bot.command()
-async def mes_notes(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    if not exists(f"noms/{id}.csv"):
-        await membre.send("veuillez faire la commande ;register pour pouvoir vous connecter")
-
-    else:
-        liste = []
-        fichier = reader(open(f"noms/{id}.csv"))
-        for ligne in fichier:
-            liste.append(ligne)
-
-        ident = str(liste[0]).replace("[", "").replace("]", "").replace("'", "")
-        mdp = str(liste[1]).replace("[", "").replace("]", "").replace("'", "")
-
-        client = pronotepy.Client('https://0312696m.index-education.net/pronote/eleve.html?login=true',
-                                  username=ident,
-                                  password=mdp)
-        res = ""
-        res2 = ""
-        dico = {}
-        dico2 = {}
-
-        if client.logged_in:
-            periods = client.periods
-            try :
-                await ctx.send("je prepare tout ca et je vous envoie un mp")
-
-                for period in periods:
-                    for grade in period.grades:
-                        if not grade.subject.name in dico :
-                            dico[grade.subject.name] = [f"{grade.grade}/{grade.out_of} le {grade.date} coeff {grade.coefficient} ({grade.comment})\n"]
-                            if not grade.grade == "Absent" :
-                                a=str(grade.grade).replace(",",".")
-                                a=float(a)
-                                b = str(grade.out_of).replace(",", ".")
-                                b = float(b)
-                                dico2[grade.subject.name] = [a,b]
-
-                        else :
-                            dico[grade.subject.name].append(f"{grade.grade}/{grade.out_of} le {grade.date} coeff {grade.coefficient} ({grade.comment})\n")
-                            if grade.grade != "Absent" and grade.grade != "NonNote":
-                                a = str(grade.grade).replace(",", ".")
-                                a = float(a)    
-
-                                b = str(grade.out_of).replace(",", ".")
-                                b = float(b)
-
-                                dico2[grade.subject.name][0] += a
-                                dico2[grade.subject.name][1] += b
-
-
-
-                for k,v in dico.items() :
-                    res=""
-                    moyenne = dico2[k][0]/dico2[k][1]
-                    moyenne = str(moyenne * 20)
-                    moyenne = moyenne[:5]
-
-                    for note in v :
-                        res = res + note
-
-                    embed = Embed(title=k, description=f"{res} \nvotre moyenne annuelle est {moyenne}" , color=0x33CAFF)
-                    await membre.send(embed = embed)
-            except :
-                await ctx.send("il y a eu une erreur veuillez verifier et/ou changer vos identifiants ($my_id)")
-
-        else:
-            await membre.send("Failed to log in")
-            exit()
-
-@bot.command()
-async def my_id(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    liste = []
-    fichier = reader(open(f"noms/{id}.csv"))
-    for ligne in fichier:
-        liste.append(ligne)
-
-    ident = str(liste[0]).replace("[", "").replace("]", "").replace("'", "")
-    mdp = str(liste[1]).replace("[", "").replace("]", "").replace("'", "")
-
-    embed = Embed(title="Identifiants", description=f"votre identifiant est : {ident}\n votre mot de passe est : {mdp}", color=0x33CAFF)
-    await membre.send(embed = embed)
-
-
-@bot.command()
-async def change(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    os.remove(f"noms/{id}.csv")
-    await membre.send("vous allez pouvoir re-entrer vos identifiants")
-    await register(ctx)
-
 
 
 # commande bonjour
@@ -328,28 +94,23 @@ async def on_member_join(member):
         Nombre_de_personnes = serveur.member_count
         salons = member.guild.text_channels
         roles = member.guild.roles
-        try:
-            for role in roles :
-                if role.name == "membre" or role.name == "Membre" :
-                    role_membre = role
-            await member.add_roles(role_membre)
-        except:
-            pass
-        
+        for role in roles :
+            if role.name == "membre" or role.name == "Membre" :
+                role_membre = role
+        await member.add_roles(role_membre)
+
         for salon in salons:
             if salon.name == "bienvenue":
                 channel = salon
         embed = Embed(title="Bienvenue",
-                    description=f"Bienvenue à {member.mention} sur le serveur \n Nous sommes {Nombre_de_personnes} avec toi <3",
+                    description=f"Bienvenue à {member.name} sur le serveur \n Nous sommes {Nombre_de_personnes} avec toi <3",
                     color=0x33CAFF)
-        
-        image = f"{str(member.avatar_url)[:-4]}128" 
-
-        embed.set_thumbnail(url = image)
-
         await channel.send(embed=embed)
     except :
-        pass
+        embed = Embed(title="Bienvenue",
+                    description=f"Bienvenue à {member.name} sur le serveur \n Nous sommes {Nombre_de_personnes} avec toi <3",
+                    color=0x33CAFF)
+        await channel.send(embed=embed)
 
 # message d'au revoir
 @bot.event
@@ -367,11 +128,6 @@ async def on_member_remove(member):
         embed = Embed(title="Au revoir",
                     description=f"Au revoir à {member.name} \n Nous sommes {Nombre_de_personnes} sans toi :(",
                     color=0x33CAFF)
-
-        image = f"{str(member.avatar_url)[:-4]}128" 
-
-        embed.set_thumbnail(url = image)
-        
         await channel.send(embed=embed)
     except :
         pass
@@ -408,6 +164,7 @@ async def shino (ctx) :
     await bot.get_user(462730008289345538).send(embed = embed)
 
    
+
 
 # commande auto_goulag
 liste_goulag = ["Tu devrais faire un tour au goulag", "TA PLACE C'EST AU GOULAG!!!",
@@ -605,7 +362,9 @@ async def stop(ctx) :
 #ajoute le role membre a tout les membres
 @bot.command()
 async def verif_roles(ctx) :
+
      : ajoute le role membre a tout le monde
+
     membres = ctx.guild.members
     roles_serv = ctx.guild.roles
     embed = Embed(title = "vérification des rôles" , description = "la vérification est bien enclenchée" , color = 0x33CAFF)
@@ -613,6 +372,7 @@ async def verif_roles(ctx) :
     for role in roles_serv :
         if role.name == "Membre" or role.name == "membre":
             role_membre = role
+
     for membre in membres :
         if not "{Bot}" in membre.roles : 
             print(membre.roles)
@@ -620,7 +380,6 @@ async def verif_roles(ctx) :
         elif "{Bot}" in membre.roles :
             await membre.remove_roles(role_membre)
 """
-
 
 
 # commande arme random
@@ -640,7 +399,7 @@ async def clemw(ctx, *args) :
 
     liste_charger = ["https://leanny.github.io/splat2/weapons/Wst_Charger_Quick_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Quick_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Quick_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_H.png","https://leanny.github.io/splat2/weapons/Wst_Charger_NormalScope_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_NormalScope_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_NormalScope_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Long_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Long_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_LongScope_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_LongScope_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Light_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Light_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Light_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Keeper_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Keeper_01.png"]
 
-    liste_slosher = ["https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_H.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_01.png"]
+    liste_slosher = ["https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_h.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_01.png"]
 
     liste_splatling = ["https://leanny.github.io/splat2/weapons/Wst_Spinner_Quick_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Quick_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Quick_02.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_02.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_H.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Hyper_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Hyper_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Downpour_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Downpour_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Serein_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Serein_01.png"]
 
@@ -659,10 +418,10 @@ async def clemw(ctx, *args) :
         "https://leanny.github.io/splat2/weapons/Wst_Charger_Quick_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Quick_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Quick_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Normal_H.png","https://leanny.github.io/splat2/weapons/Wst_Charger_NormalScope_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_NormalScope_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_NormalScope_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Long_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Long_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_LongScope_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_LongScope_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Light_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Light_01.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Light_02.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Keeper_00.png","https://leanny.github.io/splat2/weapons/Wst_Charger_Keeper_01.png" ,
 
         #slosher
-        "https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_H.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_01.png",
+        "https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_h.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_01.png",
 
         #splatling
-        "https://leanny.github.io/splat2/weapons/Wst_Spinner_Quick_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Quick_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Quick_02.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_02.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Standard_H.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Hyper_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Hyper_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Downpour_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Downpour_01.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Serein_00.png","https://leanny.github.io/splat2/weapons/Wst_Spinner_Serein_01.png",
+        "https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Strong_h.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Diffusion_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Launcher_02.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Bathtub_01.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_00.png","https://leanny.github.io/splat2/weapons/Wst_Slosher_Washtub_01.png",
     
         #dualies
         "https://leanny.github.io/splat2/weapons/Wst_Twins_Short_00.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Short_01.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Short_02.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Normal_00.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Normal_01.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Normal_02.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Normal_H.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Gallon_00.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Gallon_01.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Gallon_02.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Dual_00.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Dual_01.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Stepper_00.png","https://leanny.github.io/splat2/weapons/Wst_Twins_Stepper_01.png" ,
@@ -734,7 +493,6 @@ async def clemw(ctx, *args) :
         await ctx.send(embed=embed)
 
 
-
 @bot.command()
 async def invit(ctx):
     lien = "https://discord.com/api/oauth2/authorize?client_id=842442847982452816&permissions=8&scope=bot"
@@ -745,7 +503,7 @@ async def invit(ctx):
 @bot.command()
 async def docu(ctx):
     embed = Embed(title="documentation",
-                  description=f"voici les sites utilisés pour le bot ainsi que les personnes m'ayant aidées :\n \n inkpedia -> https://splatoonwiki.org/wiki/Main_Page \n \n pour les armes -> https://leanny.github.io/splat2new/database.html \n \n replit et vscode -> pour coder le bot \n \n la documentation de discord.py \n \n cocopw qui m'aide pour le code \n mishy la overtime (RIP) et beacoup d'autres pour les idées \n Bot codé par clem#1777 (discord) @clem_spl (twitter)\n\n\n merci à la region occitanie pour avoir donner le pc portable qui fait uniquemment tourner ce bot 🤡",
+                  description=f"voici les sites utilisés pour le bot ainsi que les personnes m'ayant aidées :\n \n inkpedia -> https://splatoonwiki.org/wiki/Main_Page \n \n replit et vscode -> pour coder le bot \n \n la documentation de discord.py \n \n cocopw qui m'aide pour le code \n mishy la overtime (RIP) et beacoup d'autres pour les idées \n Bot codé par clem#1777 (discord) @clem_spl (twitter)\n\n\n merci à la region occitanie pour avoir donner le pc portable qui fait uniquemment tourner ce bot 🤡",
                   color=0x33CAFF)
     await ctx.send(embed=embed)
 
@@ -772,7 +530,7 @@ async def citation(ctx, arg1 , arg2 ):
         serveur = str(ctx.guild.name)
         message = f"{str(arg1)} par {str(arg2)}"
         addincsv(f"citations/citation_{serveur}.csv",message)
-        embed = Embed(title="citations", description=f"voici la citations ajoutées \n{message}", color=0x33CAFF)
+        embed = Embed(title="citations", description=f"voici la citations ajoutée \n{message}", color=0x33CAFF)
         await ctx.send(embed=embed)
     
 @bot.command()
@@ -813,7 +571,7 @@ async def anniv(ctx,jour = None ,mois = None) :
                 addincsv("personne.csv",auteur.id)
                 embed = Embed(title="anniversaire", description=f"la date ajoutée est le {jour}/{mois}", color=0x33CAFF)
                 await ctx.send(embed = embed)
-                données = [auteur.id,[f" est né(e) le {jour}"]]
+                données = [auteur.id,[f" est ne(e) le {jour}"]]
         
                 if mois == "1" or  mois == "01" :
                     addincsv("mois/janvier.csv",données)
@@ -860,7 +618,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_janvier)) :
         a=noms_janvier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_janvier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_janvier = message_janvier + str(personne) + str(b) + str("""
 """)
@@ -881,7 +639,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_fevrier)) :
         a=noms_fevrier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_fevrier[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_fevrier = message_fevrier + str(personne) + str(b) + str("""
 """)
@@ -902,7 +660,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_mars)) :
         a=noms_mars[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_mars[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_mars = message_mars + str(personne) + str(b) + str("""
 """)
@@ -923,7 +681,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_avril)) :
         a=noms_avril[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_avril[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_avril = message_avril + str(personne) + str(b) + str("""
 """)
@@ -949,7 +707,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_mai)) :
         a=noms_mai[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_mai[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_mai = message_mai + str(personne) + str(b) + str("""
 """)
@@ -970,7 +728,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_juin)) :
         a=noms_juin[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_juin[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_juin = message_juin + str(personne) + str(b) + str("""
 """)
@@ -991,7 +749,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_juillet)) :
         a=noms_juillet[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_juillet[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_juillet = message_juillet + str(personne) + str(b) + str("""
 """)
@@ -1012,7 +770,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_aout)) :
         a=noms_aout[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_aout[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_aout = message_aout + str(personne) + str(b) + str("""
 """)
@@ -1023,6 +781,9 @@ async def tableau(ctx) :
 
     embed_4_8 = Embed(title = "anniversaires" , description = f"Voici les personnes nées en mai : \n {message_mai} \n \nVoici les personnes nées en juin : \n {message_juin} \n \nVoici les personnes nées en juillet : \n {message_juillet}\n \nVoici les personnes nées en aout : \n {message_aout}" , color = 0x33CAFF )
     await membre.send(embed = embed_4_8)
+
+
+
 
 
 #septembre
@@ -1037,7 +798,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_septembre)) :
         a=noms_septembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_septembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_septembre = message_septembre + str(personne) + str(b) + str("""
 """)
@@ -1058,7 +819,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_octobre)) :
         a=noms_octobre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_octobre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_octobre = message_octobre + str(personne) + str(b) + str("""
 """)
@@ -1079,7 +840,7 @@ async def tableau(ctx) :
     
     for i in range(len(noms_novembre)) :
         a=noms_novembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_novembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_novembre = message_novembre + str(personne) + str(b) + str("""
 """)
@@ -1097,9 +858,10 @@ async def tableau(ctx) :
         noms_decembre.append(data[0])
         jour_decembre.append(data[1])
     
+    
     for i in range(len(noms_decembre)) :
         a=noms_decembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
-        personne = f"<@{a}>"
+        personne = bot.get_user(int(a))
         b=jour_decembre[i].replace("'", "").replace("[", "").replace("]", "").replace('"',"").replace(",","")
         message_decembre = message_decembre + str(personne) + str(b) + str("""
 """)
@@ -1111,519 +873,264 @@ async def tableau(ctx) :
     await membre.send(embed = embed_8_12)
 
 
+
 @bot.command()
 async def stuff(ctx,*args) :
     """
      : 12 arguments -> (ssu,rsu,scu,spu,ss,qsj,qr,os,mpu,iss,ism,bdu,cbl,ir,iru,dr,lde,sbpu,tnty,hnt,ns,thi,rsp,sj,og)
     """
-    fs.clear()
-    if args == () :
-        embed = Embed(description=f"Il faut mettre des bonus \n vous pouvez les trouver dans la commande help", color = 0x33CAFF)
-        await ctx.send(embed = embed)
-
-    else :
-
-        embed_message = Embed(description = f" sous quelle forme voulez vous votre stuff? ⏺ : emoji ou ⏹ : image\nNote : l'image peut prendre du temps à s'afficher \nVous pouvez également sauvgegarder ce stuff si vous choississez l'image" , color = 0x33CAFF)
-
-        message = await ctx.send(embed = embed_message)
-        await message.add_reaction("⏺")
-        await message.add_reaction("⏹")
-
-
-        def checkEmoji(reaction, user):
-            return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "⏺" or str(reaction.emoji) == "⏹")
-
-        try:
-            reaction, user = await bot.wait_for("reaction_add", timeout = 45, check = checkEmoji)
-
-            if reaction.emoji == "⏺" :
-                stuf = []
-                liste = []
-                for n in args :
-                    liste.append(n)
-                
-                for i in range(12-len(args)) :
-                    liste.append("uk") 
-
-                i = 0
-                returne = True
-
-                while i != 12:
-                    try:
-                        if liste[i] == 'ssu' or liste[i] == "Ssu" or liste[i] == "SSU" :
-                            stuf.append('<:ssu:855390371827023882>')
-                            i += 1
-                        elif liste[i] == 'rsu'or liste[i] == "Rsu" or liste[i] == "RSU":
-                            stuf.append('<:rsu:855390367264407572>')
-                            i += 1
-                        elif liste[i] == 'scu' or liste[i] == "Scu" or liste[i] == "SCU":
-                            stuf.append('<:scu:855390371840000001>')
-                            i += 1
-                        elif liste[i] == 'spu' or liste[i] == "Spu" or liste[i] == "SPU":
-                            stuf.append('<:spu:855390372254318622>')
-                            i += 1
-                        elif liste[i] == 'ss' or liste[i] == "Ss" or liste[i] == "SS":
-                            stuf.append('<:ss:855390372129144842>')
-                            i += 1
-                        elif liste[i] == 'qsj' or liste[i] == "Qsj" or liste[i] == "QSJ":
-                            stuf.append('<:qsj:855390367745310750>')
-                            i += 1
-                        elif liste[i] == 'qr' or liste[i] == "Qr" or liste[i] == "QR":
-                            stuf.append('<:qr:855390372208312330>')
-                            i += 1
-                        elif liste[i] == 'os' or liste[i] == "Os" or liste[i] == "OS":
-                            stuf.append('<:os:855390368778027038>')
-                            i += 1
-                        elif liste[i] == 'mpu' or liste[i] == "Mpu" or liste[i] == "MPU":
-                            stuf.append('<:mpu:855390368131842068>')
-                            i += 1
-                        elif liste[i] == 'iss' or liste[i] == "Iss" or liste[i] == "ISS":
-                            stuf.append('<:iss:855390372125868063>')
-                            i += 1
-                        elif liste[i] == 'ism' or liste[i] == "Ism" or liste[i] == "ISM":
-                            stuf.append('<:ism:855390367586975745>')
-                            i += 1
-                        elif liste[i] == 'bdu' or liste[i] == "Bdu" or liste[i] == "BDU":
-                            stuf.append('<:bdu:855390365708058624>')
-                            i += 1
-                        elif liste[i] == 'cbk' or liste[i] == "Cbk" or liste[i] == "CBK":
-                            stuf.append('<:cbk:855390366157242388>')
-                            i += 1
-                        elif liste[i] == 'ir' or liste[i] == "Ir" or liste[i] == "IR":
-                            stuf.append('<:ir:855390370362556436>')
-                            i += 1
-                        elif liste[i] == 'dr' or liste[i] == "Dr" or liste[i] == "DR":
-                            stuf.append('<:dr:855390372204773387>')
-                            i += 1
-                        elif liste[i] == 'iru' or liste[i] == "Iru" or liste[i] == "IRU":
-                            stuf.append('<:iru:855390367464292352>')
-                            i += 1
-                        elif liste[i] == 'lde' or liste[i] == "Lde" or liste[i] == "LDE":
-                            stuf.append('<:lde:855390366755717120>')
-                            i += 1
-                        elif liste[i] == 'sbpu' or liste[i] == "Sbpu" or liste[i] == "SBPU":
-                            stuf.append('<:sbpu:855390365895753749>')
-                            i += 1
-                        elif liste[i] == 'tnty' or liste[i] == "Tnty" or liste[i] == "TNTY":
-                            stuf.append('<:tnty:855390368065388576>')
-                            i += 1
-                        elif liste[i] == 'hnt' or liste[i] == "Hnt" or liste[i] == "HNT":
-                            stuf.append('<:hnt:855390366453989426>')
-                            i += 1
-                        elif liste[i] == 'ns' or liste[i] == "Ns" or liste[i] == "NS":
-                            stuf.append('<:ns:855390376185692180>')
-                            i += 1
-                        elif liste[i] == 'thi' or liste[i] == "Thi" or liste[i] == "THi":
-                            stuf.append('<:ti:855390376374304798>')
-                            i += 1
-                        elif liste[i] == 'rsp' or liste[i] == "Rsp" or liste[i] == "RSP":
-                            stuf.append('<:rp:855390366991646730>')
-                            i += 1
-                        elif liste[i] == 'sj' or liste[i] == "Sj" or liste[i] == "SJ":
-                            stuf.append('<:sj:855390376235892756>')
-                            i += 1
-                        elif liste[i] == 'og' or liste[i] == "Og" or liste[i] == "OG":
-                            stuf.append('<:og:855390372141465610>')
-                            i += 1
-                        elif liste[i] == 'ab' or liste[i] == "Ab" or liste[i] == "AB":
-                            stuf.append('<:ab:855479824009527306> ')
-                            i += 1
-                        elif liste[i] == 'uk' or liste[i] == "?" or liste[i] == "Uk" or liste[i] == "UK" :
-                            stuf.append('<:uk:855479856511057951>')
-                            i += 1
-                        else:
-                            returne = False
-                            break
-                        if i == 4 or i == 8:
-                            stuf.append('newline')
-
-
-                    except:
-                        break
-                if returne:
-                    a = str(stuf)
-
-                    a = a.replace('[', '').replace(']', '').replace(',', '').replace("'", '').replace('newline', '''
-    ''').replace('         ','')
-
-                    embed = Embed(title = "stuff" , description = f"{a}" , color = 0x33CAFF)
-
-                    await ctx.send(embed = embed)
-                else:
-                    embed = Embed(title = "bonus inconnu" , description = 'le bonus n°' + str(i) + ' est introuvable' , color = 0x33CAFF)
-                    await ctx.send(embed = embed)
-
-
-
-            elif reaction.emoji == "⏹" :
-                
-                stuf = []
-                liste = []
-                for n in args :
-                    liste.append(n)
-
-                for i in range(12-len(args)) :
-                    liste.append("uk") 
-
-                i = 0
-                returne = True
-
-
-                while i != 12:
-                    try:
-                        if liste[i] == 'ssu' or liste[i] == "Ssu" or liste[i] == "SSU" :
-                            fs.ssu(i+1)
-                            i += 1
-                        elif liste[i] == 'rsu'or liste[i] == "Rsu" or liste[i] == "RSU":
-                            fs.rsu(i+1)
-                            i += 1
-                        elif liste[i] == 'scu' or liste[i] == "Scu" or liste[i] == "SCU":
-                            fs.scu(i+1)
-                            i += 1
-                        elif liste[i] == 'spu' or liste[i] == "Spu" or liste[i] == "SPU":
-                            fs.spu(i+1)
-                            i += 1
-                        elif liste[i] == 'ss' or liste[i] == "Ss" or liste[i] == "SS":
-                            fs.ss(i+1)
-                            i += 1
-                        elif liste[i] == 'qsj' or liste[i] == "Qsj" or liste[i] == "QSJ":
-                            fs.qsj(i+1)
-                            i += 1
-                        elif liste[i] == 'qr' or liste[i] == "Qr" or liste[i] == "QR":
-                            fs.qr(i+1)
-                            i += 1
-                        elif liste[i] == 'os' or liste[i] == "Os" or liste[i] == "OS":
-                            fs.os(i+1)
-                            i += 1
-                        elif liste[i] == 'mpu' or liste[i] == "Mpu" or liste[i] == "MPU":
-                            fs.mpu(i+1)
-                            i += 1
-                        elif liste[i] == 'iss' or liste[i] == "Iss" or liste[i] == "ISS":
-                            fs.iss(i+1)
-                            i += 1
-                        elif liste[i] == 'ism' or liste[i] == "Ism" or liste[i] == "ISM":
-                            fs.ism(i+1)
-                            i += 1
-                        elif liste[i] == 'bdu' or liste[i] == "Bdu" or liste[i] == "BDU":
-                            fs.bdu(i+1)
-                            i += 1
-                        elif liste[i] == 'cbk' or liste[i] == "Cbk" or liste[i] == "CBK":
-                            fs.cbk(i+1)
-                            i += 1
-                        elif liste[i] == 'ir' or liste[i] == "Ir" or liste[i] == "IR":
-                            fs.ir(i+1)
-                            i += 1
-                        elif liste[i] == 'dr' or liste[i] == "Dr" or liste[i] == "DR":
-                            fs.dr(i+1)
-                            i += 1
-                        elif liste[i] == 'iru' or liste[i] == "Iru" or liste[i] == "IRU":
-                            fs.iru(i+1)
-                            i += 1
-                        elif liste[i] == 'lde' or liste[i] == "Lde" or liste[i] == "LDE":
-                            fs.lde(i+1)
-                            i += 1
-                        elif liste[i] == 'sbpu' or liste[i] == "Sbpu" or liste[i] == "SBPU":
-                            fs.sbpu(i+1)
-                            i += 1
-                        elif liste[i] == 'tnty' or liste[i] == "Tnty" or liste[i] == "TNTY":
-                            fs.tnty(i+1)
-                            i += 1
-                        elif liste[i] == 'hnt' or liste[i] == "Hnt" or liste[i] == "HNT":
-                            fs.hnt(i+1)
-                            i += 1
-                        elif liste[i] == 'ns' or liste[i] == "Ns" or liste[i] == "NS":
-                            fs.ns(i+1)
-                            i += 1
-                        elif liste[i] == 'thi' or liste[i] == "Thi" or liste[i] == "THi":
-                            fs.thi(i+1)
-                            i += 1
-                        elif liste[i] == 'rsp' or liste[i] == "Rsp" or liste[i] == "RSP":
-                            fs.rsp(i+1)
-                            i += 1
-                        elif liste[i] == 'sj' or liste[i] == "Sj" or liste[i] == "SJ":
-                            fs.sj(i+1)
-                            i += 1
-                        elif liste[i] == 'og' or liste[i] == "Og" or liste[i] == "OG":
-                            fs.og(i+1)
-                            i += 1
-                        elif liste[i] == 'ab' or liste[i] == "Ab" or liste[i] == "AB":
-                            fs.ab(i+1)
-                            i += 1
-                        elif liste[i] == 'uk' or liste[i] == "?" or liste[i] == "Uk" or liste[i] == "UK" :
-                            fs.uk(i+1)
-                            i += 1
-                        else:
-                            returne = False
-                            break
-
-
-                    except:
-                        break
-
-                if returne:
-
-                    embed = Embed(title="stuff", description=f"voici le stuff en image", color=0x33CAFF)
-
-                    await ctx.send(embed=embed)
-
-                    await ctx.send(file=File(r"images_bot/emote_stuff/blanc_resultat.png"))
-
-                    embed_message = Embed(description=f"Voulez vous sauvegarder ce stuff?", color=0x33CAFF)
-
-                    message = await ctx.send(embed=embed_message)
-                    await message.add_reaction("✅")
-                    await message.add_reaction("❌")
-
-                    try :
-
-                        def checkEmoji(reaction, user):
-                            return ctx.message.author == user and message.id == reaction.message.id and (
-                                    str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
-
-                        reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
-                        
-
-                        if reaction.emoji == "✅":
-                            
-                            try :
-                                def checkMessage(message):
-                                    return message.author == ctx.message.author and ctx.message.channel == message.channel
-                                
-                                await ctx.send("choississez un nom pour votre stuff")
-                                nom_stuff = await bot.wait_for("message", timeout=45 , check = checkMessage)
-                                nom_stuff = nom_stuff.content
-                                nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
-                                id = ctx.author.id
-
-                                if not exists(f"stuffs/{id}") :
-                                    
-                                    os.mkdir(f"stuffs/{id}")
-                                    fs.save(id,nom_stuff)
-                                    with open(f"stuffs/{id}/{id}","wb") as csvfile:
-                                        filewriter = writer(csvfile, delimiter=',', quotechar='|', quoting=QUOTE_MINIMAL)
-
-                                    addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
-                                    await ctx.send(f"sauvegarde éffectuée")
-                                    fs.clear()
-
-
-                                else :
-                                    
-                                    if not verif_stuff(id,nom_stuff) :
-                                        message = await ctx.send(f"Ce nom de stuff existe déjà \nVoulez vous remplacer l'image du stuff {nom_stuff}")
-                                        await message.add_reaction("✅")
-                                        await message.add_reaction("❌")
-
-                                        try :
-                                            def checkEmoji(reaction, user):
-                                                return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
-
-                                            reaction, user = await bot.wait_for("reaction_add", timeout=20, check=checkEmoji)
-
-                                            if reaction.emoji == "✅":
-                                                await ctx.send("Stuff sauvegardé")
-                                                fs.save(id,nom_stuff)
-                                            
-                                            elif reaction.emoji == "❌" :
-                                                await ctx.send("D'accord j'annule la sauvegarde")
-                                                fs.clear()
-                                        
-                                        except :
-                                            embed = Embed(description = f"Les 30 secondes sont passées")
-                                            await ctx.send(embed = embed)
-                                    
-                                    else :
-                                        fs.save(id,nom_stuff)
-                                        addincsv(f"stuffs/{id}/{id}.csv",nom_stuff)
-                                        await ctx.send(f"sauvegarde éffectuée")
-                                        fs.clear()
-                            except :
-                                pass
-
-                        elif reaction.emoji == "❌" :
-                            await message.delete()
-                    
-                        else :
-                            pass
-
-                    except :
-                        embed = Embed(description = f"Les 30 secondes sont passées")
-                        await ctx.send(embed = embed)
-
-
-                else:
-                    embed = Embed(title="bonus inconnu", description='le bonus n°' + str(i+1) + ' est introuvable',
-                                  color=0x33CAFF)
-                    await ctx.send(embed=embed)
-
-                    fs.clear()
-        except :
-            embed = Embed(description = f"Les 45 secondes sont passées")
-            await ctx.send(embed = embed)
-
-def verif_stuff(nom,nom_stuff) :
-    fichier = reader(open(f"stuffs/{nom}/{nom}.csv"))
     
-    for ligne in fichier:
-        a = str(ligne[0]).replace("[", "")
-        if nom_stuff == a:
-            return False
-    return True
+    
+    embed_message = Embed(description = f" sous quelle forme voulez vous votre stuff? ⏺ : emoji ou ⏹ : image\nNote : l'image peut prendre du temps à s'afficher " , color = 0x33CAFF)
+
+    message = await ctx.send(embed = embed_message)
+    await message.add_reaction("⏺")
+    await message.add_reaction("⏹")
 
 
-@bot.command()
-async def mes_stuffs(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    try :
-        fichier = reader(open(f"stuffs/{id}/{id}.csv"))
+    def checkEmoji(reaction, user):
+        return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "⏺" or str(reaction.emoji) == "⏹")
+
+ 
+
+    try:
+        reaction, user = await bot.wait_for("reaction_add", timeout = 20, check = checkEmoji)
         
-        await ctx.send(f"le reste se passe en mp")
-
-        for ligne in fichier:
-            a = str(ligne[0])
-            url = f"stuffs/{id}/{a}"
-            await membre.send(f"votre stuff {a}")
-            await membre.send(file = File(rf"stuffs/{id}/{a}.png"))
-
-    except :
-        await ctx.send(f"il faut enregistrer vos stuffs avec la commande $stuff")
-
-@bot.command()
-async def mes_stuff(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    try :
-        fichier = reader(open(f"stuffs/{id}/{id}.csv"))
+        if reaction.emoji == "⏺" :
+            stuf = []
+            liste = []
+            for n in args :
         
-        await ctx.send(f"le reste se passe en mp")
+                liste.append(n)
+            i = 0
+            returne = True
 
-        for ligne in fichier:
-            a = str(ligne[0])
-            url = f"stuffs/{id}/{a}"
-            await membre.send(f"votre stuff {a}")
-            await membre.send(file = File(rf"stuffs/{id}/{a}.png"))
-
-    except :
-        await ctx.send(f"il faut enregistrer vos stuffs avec la commande $stuff")
-
-@bot.command()
-async def rename(ctx) :
-    await ctx.send(f"la suite se passe en mp pour ne pas flood")
-    
-    membre = ctx.author
-    id = ctx.author.id
-    
-    await membre.send(f"Entrez le nom du stuff voulez vous renomer\n(Faites la commande $mes_stuffs pour tous les voir)")
-    
-    def checkMessage(message):
-	    return message.author == ctx.message.author and ctx.message.channel == message.channel
-
-    nom_stuff = await bot.wait_for("message", timeout=60 ,check = checkMessage)
-    nom_stuff = nom_stuff.content
-    nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
-
-    fichier = reader(open(f"stuffs/{id}/{id}.csv"))
-    print("oui")
-    i=0
-    for ligne in fichier :
-        if str(ligne[0]) == str(nom_stuff) :
-            message = await membre.send(f"vous voules renomer ce stuff : {ligne[0]}")
-            await message.add_reaction("✅")
-            await message.add_reaction("❌")
-            try :
-                def checkEmoji(reaction, user):
-                    return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")                        
-                        
-                reaction, user = await bot.wait_for("reaction_add", timeout=30, check=checkEmoji)
-                        
-                if reaction.emoji == "✅":
-                    vieux = ligne[0]
-
-                    await membre.send("Entrez le nouveau nom")
-                    nouveau_nom = await bot.wait_for("message", timeout=60 ,check = checkMessage)
-                    nouveau_nom = nouveau_nom.content
-                    nouveau_nom = str(nouveau_nom).replace(" ","_").replace("+","_")
-                    
-                    if not verif_stuff(id,nouveau_nom) :
-                        message = await ctx.send(f"Ce nom de stuff existe déjà \nVoulez vous remplacer l'image du stuff {nouveau_nom} par {nom_stuff}")
-                        await message.add_reaction("✅")
-                        await message.add_reaction("❌")
-
-                        try :
-                            def checkEmoji(reaction, user):
-                                return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "✅" or str(reaction.emoji) == "❌")
-
-                            reaction, user = await bot.wait_for("reaction_add", timeout=30, check=checkEmoji)
-
-                            if reaction.emoji == "✅":
-                                os.remove(f"stuffs/{id}/{vieux}.png")
-                                await ctx.send(f"Votre stuff {vieux} a été renommé en {nouveau_nom} et l'autre supprimé")
-                                
-                                        
-                            elif reaction.emoji == "❌" :
-                                await ctx.send("D'accord j'annule la sauvegarde")
-                                break
-                        except :
-                            embed = Embed(description = f"Les 30 secondes sont passées")
-                            await membre.send(embed = embed)
-                        
-                    else :
-                        ancien = rf"stuffs/{id}/{vieux}.png"
-                        new_name = rf"stuffs/{id}/{nouveau_nom}.png"
-                        os.rename(ancien,new_name)
-                        suprligne(f"stuffs/{id}/{id}.csv",i)
-                        addincsv(f"stuffs/{id}/{id}.csv",nouveau_nom)
-                        await membre.send(f"changement de {vieux} à {nouveau_nom} éffecué")
+            while i != 12:
+                try:
+                    if liste[i] == 'ssu' or liste[i] == "Ssu" or liste[i] == "SSU" :
+                        stuf.append('<:ssu:855390371827023882>')
+                        i += 1
+                    elif liste[i] == 'rsu'or liste[i] == "Rsu" or liste[i] == "RSU":
+                        stuf.append('<:rsu:855390367264407572>')
+                        i += 1
+                    elif liste[i] == 'scu' or liste[i] == "Scu" or liste[i] == "SCU":
+                        stuf.append('<:scu:855390371840000001>')
+                        i += 1
+                    elif liste[i] == 'spu' or liste[i] == "Spu" or liste[i] == "SPU":
+                        stuf.append('<:spu:855390372254318622>')
+                        i += 1
+                    elif liste[i] == 'ss' or liste[i] == "Ss" or liste[i] == "SS":
+                        stuf.append('<:ss:855390372129144842>')
+                        i += 1
+                    elif liste[i] == 'qsj' or liste[i] == "Qsj" or liste[i] == "QSJ":
+                        stuf.append('<:qsj:855390367745310750>')
+                        i += 1
+                    elif liste[i] == 'qr' or liste[i] == "Qr" or liste[i] == "QR":
+                        stuf.append('<:qr:855390372208312330>')
+                        i += 1
+                    elif liste[i] == 'os' or liste[i] == "Os" or liste[i] == "OS":
+                        stuf.append('<:os:855390368778027038>')
+                        i += 1
+                    elif liste[i] == 'mpu' or liste[i] == "Mpu" or liste[i] == "MPU":
+                        stuf.append('<:mpu:855390368131842068>')
+                        i += 1
+                    elif liste[i] == 'iss' or liste[i] == "Iss" or liste[i] == "ISS":
+                        stuf.append('<:iss:855390372125868063>')
+                        i += 1
+                    elif liste[i] == 'ism' or liste[i] == "Ism" or liste[i] == "ISM":
+                        stuf.append('<:ism:855390367586975745>')
+                        i += 1
+                    elif liste[i] == 'bdu' or liste[i] == "Bdu" or liste[i] == "BDU":
+                        stuf.append('<:bdu:855390365708058624>')
+                        i += 1
+                    elif liste[i] == 'cbk' or liste[i] == "Cbk" or liste[i] == "CBK":
+                        stuf.append('<:cbk:855390366157242388>')
+                        i += 1
+                    elif liste[i] == 'ir' or liste[i] == "Ir" or liste[i] == "IR":
+                        stuf.append('<:ir:855390370362556436>')
+                        i += 1
+                    elif liste[i] == 'dr' or liste[i] == "Dr" or liste[i] == "DR":
+                        stuf.append('<:dr:855390372204773387>')
+                        i += 1
+                    elif liste[i] == 'iru' or liste[i] == "Iru" or liste[i] == "IRU":
+                        stuf.append('<:iru:855390367464292352>')
+                        i += 1
+                    elif liste[i] == 'lde' or liste[i] == "Lde" or liste[i] == "LDE":
+                        stuf.append('<:lde:855390366755717120>')
+                        i += 1
+                    elif liste[i] == 'sbpu' or liste[i] == "Sbpu" or liste[i] == "SBPU":
+                        stuf.append('<:sbpu:855390365895753749>')
+                        i += 1
+                    elif liste[i] == 'tnty' or liste[i] == "Tnty" or liste[i] == "TNTY":
+                        stuf.append('<:tnty:855390368065388576>')
+                        i += 1
+                    elif liste[i] == 'hnt' or liste[i] == "Hnt" or liste[i] == "HNT":
+                        stuf.append('<:hnt:855390366453989426>')
+                        i += 1
+                    elif liste[i] == 'ns' or liste[i] == "Ns" or liste[i] == "NS":
+                        stuf.append('<:ns:855390376185692180>')
+                        i += 1
+                    elif liste[i] == 'thi' or liste[i] == "Thi" or liste[i] == "THi":
+                        stuf.append('<:ti:855390376374304798>')
+                        i += 1
+                    elif liste[i] == 'rsp' or liste[i] == "Rsp" or liste[i] == "RSP":
+                        stuf.append('<:rp:855390366991646730>')
+                        i += 1
+                    elif liste[i] == 'sj' or liste[i] == "Sj" or liste[i] == "SJ":
+                        stuf.append('<:sj:855390376235892756>')
+                        i += 1
+                    elif liste[i] == 'og' or liste[i] == "Og" or liste[i] == "OG":
+                        stuf.append('<:og:855390372141465610>')
+                        i += 1
+                    elif liste[i] == 'ab' or liste[i] == "Ab" or liste[i] == "AB":
+                        stuf.append('<:ab:855479824009527306> ')
+                        i += 1
+                    elif liste[i] == 'uk' or liste[i] == "?" or liste[i] == "Uk" or liste[i] == "UK" :
+                        stuf.append('<:uk:855479856511057951>')
+                        i += 1
+                    else:
+                        returne = False
                         break
+                    if i == 4 or i == 8:
+                        stuf.append('newline')
+
+
+                except:
+                    break
+            if returne:
+                a = str(stuf)
+
+                a = a.replace('[', '').replace(']', '').replace(',', '').replace("'", '').replace('newline', '''
+''').replace('         ','')
+                
+                embed = Embed(title = "stuff" , description = f"{a}" , color = 0x33CAFF)
+
+                await ctx.send(embed = embed)
+            else:
+                embed = Embed(title = "bonus inconnu" , description = 'le bonus n°' + str(i) + ' est introuvable' , color = 0x33CAFF)
+                await ctx.send(embed = embed)
             
-                elif reaction.emoji == "❌" :
-                    await membre.send(f"D'accord, il doit y avoir une erreur")
-            except :
-                embed = Embed(description = f"Les 30 secondes sont passées")
-                await membre.send(embed = embed)
+            
 
-        i+=1
-
-
-@bot.command()
-async def access(ctx,stuff) :
-    membre = ctx.author
-    id = ctx.author.id
-    await ctx.send(f"ça se passe en mp")
-    try :
-        await membre.send(f"Voici votre stuff  : {stuff}")
-        await membre.send(file = File(rf"stuffs/{id}/{stuff}.png"))
-    
-    except :
-        embed_erreur = Embed(description = f"Il y a eu une erreur, veuillez vérifier le nom du stuff que vous vouliez voir via la commande mus_stuffs")
-        await membre.send(embed = embed_erreur)
-
-
-@bot.command()
-async def suppr(ctx,stuff) :
-    id = ctx.author.id
-    membre = ctx.author
-    try :
-        res = False
-        fichier = reader(open(f"stuffs/{id}/{id}.csv"))
-        for ligne in fichier :
-            if str(ligne[0])==str(stuff) :
-                suprligne(f"stuffs/{id}/{id}.csv",fichier.line_num-1)
-                os.remove(f"stuffs/{id}/{stuff}.png")
-                await membre.send(f"J'ai bien supprimé le stuff {stuff}")
-                res = True
+        elif reaction.emoji == "⏹" :
+            stuf = []
+            liste = []
+            for n in args :
         
-        for ligne in fichier :
-            print(ligne)
-            await membre.send("Vous avez supprimé votre dernier stuff")
+                liste.append(n)
+            i = 0
+            returne = True
 
-        if not res :
-            await membre.send(f"veuillez vérifier vos stuffs via la commande 'mes_stuffs'")  
+            while i != 12:
+                try:
+                    if liste[i] == 'ssu' or liste[i] == "Ssu" or liste[i] == "SSU" :
+                        fs.ssu(i+1)
+                        i += 1
+                    elif liste[i] == 'rsu'or liste[i] == "Rsu" or liste[i] == "RSU":
+                        fs.rsu(i+1)
+                        i += 1
+                    elif liste[i] == 'scu' or liste[i] == "Scu" or liste[i] == "SCU":
+                        fs.scu(i+1)
+                        i += 1
+                    elif liste[i] == 'spu' or liste[i] == "Spu" or liste[i] == "SPU":
+                        fs.spu(i+1)
+                        i += 1
+                    elif liste[i] == 'ss' or liste[i] == "Ss" or liste[i] == "SS":
+                        fs.ss(i+1)
+                        i += 1
+                    elif liste[i] == 'qsj' or liste[i] == "Qsj" or liste[i] == "QSJ":
+                        fs.qsj(i+1)
+                        i += 1
+                    elif liste[i] == 'qr' or liste[i] == "Qr" or liste[i] == "QR":
+                        fs.qr(i+1)
+                        i += 1
+                    elif liste[i] == 'os' or liste[i] == "Os" or liste[i] == "OS":
+                        fs.os(i+1)
+                        i += 1
+                    elif liste[i] == 'mpu' or liste[i] == "Mpu" or liste[i] == "MPU":
+                        fs.mpu(i+1)
+                        i += 1
+                    elif liste[i] == 'iss' or liste[i] == "Iss" or liste[i] == "ISS":
+                        fs.iss(i+1)
+                        i += 1
+                    elif liste[i] == 'ism' or liste[i] == "Ism" or liste[i] == "ISM":
+                        fs.ism(i+1)
+                        i += 1
+                    elif liste[i] == 'bdu' or liste[i] == "Bdu" or liste[i] == "BDU":
+                        fs.bdu(i+1)
+                        i += 1
+                    elif liste[i] == 'cbk' or liste[i] == "Cbk" or liste[i] == "CBK":
+                        fs.cbk(i+1)
+                        i += 1
+                    elif liste[i] == 'ir' or liste[i] == "Ir" or liste[i] == "IR":
+                        fs.ir(i+1)
+                        i += 1
+                    elif liste[i] == 'dr' or liste[i] == "Dr" or liste[i] == "DR":
+                        fs.dr(i+1)
+                        i += 1
+                    elif liste[i] == 'iru' or liste[i] == "Iru" or liste[i] == "IRU":
+                        fs.iru(i+1)
+                        i += 1
+                    elif liste[i] == 'lde' or liste[i] == "Lde" or liste[i] == "LDE":
+                        fs.lde(i+1)
+                        i += 1
+                    elif liste[i] == 'sbpu' or liste[i] == "Sbpu" or liste[i] == "SBPU":
+                        fs.sbpu(i+1)
+                        i += 1
+                    elif liste[i] == 'tnty' or liste[i] == "Tnty" or liste[i] == "TNTY":
+                        fs.tnty(i+1)
+                        i += 1
+                    elif liste[i] == 'hnt' or liste[i] == "Hnt" or liste[i] == "HNT":
+                        fs.hnt(i+1)
+                        i += 1
+                    elif liste[i] == 'ns' or liste[i] == "Ns" or liste[i] == "NS":
+                        fs.ns(i+1)
+                        i += 1
+                    elif liste[i] == 'thi' or liste[i] == "Thi" or liste[i] == "THi":
+                        fs.thi(i+1)
+                        i += 1
+                    elif liste[i] == 'rsp' or liste[i] == "Rsp" or liste[i] == "RSP":
+                        fs.rsp(i+1)
+                        i += 1
+                    elif liste[i] == 'sj' or liste[i] == "Sj" or liste[i] == "SJ":
+                        fs.sj(i+1)
+                        i += 1
+                    elif liste[i] == 'og' or liste[i] == "Og" or liste[i] == "OG":
+                        fs.og(i+1)
+                        i += 1
+                    elif liste[i] == 'ab' or liste[i] == "Ab" or liste[i] == "AB":
+                        fs.ab(i+1)
+                        i += 1
+                    elif liste[i] == 'uk' or liste[i] == "?" or liste[i] == "Uk" or liste[i] == "UK" :
+                        fs.uk(i+1)
+                        i += 1
+                    else:
+                        returne = False
+                        break            
+                    
 
+                except:
+                    break
+            if returne:
+                        
+                embed = Embed(title = "stuff" , description = f"voici le stuff en image" , color = 0x33CAFF)
 
+                await ctx.send(embed = embed)
+
+                await ctx.send(file = File(r"images_bot/emote_stuff/blanc_resultat.png")) 
+                
+                for i in range(1,12) :
+                    fs.clear(i)
+                
+
+            else:
+                embed = Embed(title = "bonus inconnu" , description = 'le bonus n°' + str(i) + ' est introuvable' , color = 0x33CAFF)
+                await ctx.send(embed = embed)
+                
+                for i in range(1,12) :
+                    fs.clear(i)
     except :
-        await membre.send(f"veuillez vérifier vos stuffs via la commande 'mes_stuffs'")  
+        pass
 
 
 @bot.command()
@@ -2025,6 +1532,83 @@ async def code(ctx , membre : Member = None) :
 
         await ctx.send(embed = embed_1)
         
+
+
+
+# embed commande bot_help
+@bot.command()
+async def thelp(ctx):
+    """
+     : commande du bot pour les aides
+    """
+    membre = ctx.author
+    embed_help_1 = Embed(title="help clem 3eme du nom" , description="-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff affiche votre stuff en emojis\n   voivci les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" , color=0x33CAFF)
+    embed_help_2 = Embed(title = "help clem 3eme du nom" , description = "-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil (sans ping) ou celle de vos amis (avec ping)\n \n-> info : montre les informations d'un profil \n \n-> add : ajoute votre code amis \n \n-> code : montre votre code amis (sans ping) ou celui de vos amis (avec ping) \n \n-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
+    embed_help_3 = Embed(title = "help clem 3eme du nom" , description = f"-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
+
+    embed_help_1.set_footer(text= f"1/3")
+    embed_help_2.set_footer(text= f"2/3")    
+    embed_help_3.set_footer(text= f"3/3")
+
+    await membre.send (embed = embed_help_1)
+    await membre.send (embed = embed_help_2)
+    await membre.send (embed = embed_help_3)
+
+@bot.command()
+async def help(ctx) :
+    if not "Direct Message" in str(ctx.channel) :
+        membre = ctx.author
+        embed_help_1 = Embed(title = "help clem 3eme du nom" , description = f"-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff : affiche votre stuff en emojis\n   voici les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" , color=0x33CAFF)
+        embed_help_2 = Embed(title = "help clem 3eme du nom" , description = f"-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil (sans ping) ou celle de vos amis (avec ping)\n \n-> info : montre les informations d'un profil \n \n-> add : ajoute votre code amis \n \n-> code : montre votre code amis (sans ping) ou celui de vos amis (avec ping) \n \n-> delete 'nombre de messages' : (à noter qu'il faur certaines permissions)\n \n-> syracuse 'nombre' : vous renvoi le maximum atteint et le nombre de tours\n \n-> data : vous envoi le nom exact des armes nécesaire à la commande match\n \n-> match '8 armes' : renvoi des compositions équitables\n \n-> matchr : renvoi des compositions équitables aléatoire\n \n-> set_role 'nom du role' un emoji quelconque : (nécessite un salon role) permet d'obtenir un role" , color = 0x33CAFF)
+        embed_help_3 = Embed(title = "help clem 3eme du nom" , description = f"-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
+
+        embed_help_1.set_footer(text= f"1/3")
+        embed_help_2.set_footer(text= f"2/3")    
+        embed_help_3.set_footer(text= f"3/3")
+
+        message = await ctx.send(embed = embed_help_1)
+        await message.add_reaction("◀️")
+        await message.add_reaction("▶️")
+    
+
+
+        def checkEmoji(reaction, user):
+    	    return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == "◀️" or str(reaction.emoji) == "▶️" )
+
+        embed_valid = Embed(description = f"votre code amis  est bien enregistré" , color = 0x33CAFF)
+        embed_annul = Embed(description = f"votre code amis n'a pas été enregistré" , color = 0x33CAFF)
+    
+        a=True
+        cpt=1
+    
+        while a == True :
+            reaction, user = await bot.wait_for("reaction_add", timeout = None, check = checkEmoji)
+        
+            if reaction.emoji == "▶️" :  
+
+                if cpt==1 :
+                    cpt+=1 
+                    await message.edit(embed = embed_help_2)
+                    await message.remove_reaction(emoji = "▶️" , member = membre)
+                elif cpt==2 :
+                    cpt += 1
+                    await message.edit(embed = embed_help_3)
+                    await message.remove_reaction(emoji = "▶️" , member = membre)
+
+                    
+            
+        
+            elif reaction.emoji == "◀️" :   
+                if cpt==2 :
+                    cpt -= 1 
+                    await message.edit(embed = embed_help_1)
+                    await message.remove_reaction(emoji = "◀️" , member = membre)
+                elif cpt==3 :
+                    cpt -= 1
+                    await message.edit(embed = embed_help_2)
+                    await message.remove_reaction(emoji = "◀️" , member = membre)
+    else :
+        await thelp(ctx)
         
     
 @bot.command(name="delete", pass_context=True)
@@ -2036,9 +1620,72 @@ async def delete(ctx, number: int):
         await message.delete()
     
     await ctx.send(f"{number} messages ont été supprimés")
-       
 
 
+
+
+@bot.command(name="set_role", pass_context=True)
+@commands.has_permissions(administrator=True)
+async def set_role(ctx , role , react) :
+
+    print(role)
+
+    channel = ""
+    s = False
+    for salon in ctx.guild.text_channels :
+        if salon.name == "role" or salon.name == "rôle" or salon.name == "roles" or salon.name == "rôles":
+            channel = salon
+            s = True
+            break
+    
+    role_add =""
+    r=False
+    for roles in ctx.guild.roles :
+        
+        if str(roles.id) in role :
+            role_add = roles
+            r = True
+            break
+
+    a=""
+
+    if s==False :    
+        await ctx.send("vous devez créer un salon role")
+
+
+    else :
+        for i in str(role) :
+            if i == "@" :
+        
+                a = str(role).replace("@","")
+            else :
+                a = role
+        print(a)
+        role_add = await ctx.guild.create_role(name = a)
+    
+        embed_mess = Embed(description = f"Ajoutez la réaction {react} si vous voulez le role {a}" , color = 0x33CAFF)
+        message = await bot.get_channel(channel.id).send(embed = embed_mess)
+        await message.add_reaction(react)
+
+        def checkEmoji(reaction, user):
+    	    return ctx.message.author == user and message.id == reaction.message.id and (str(reaction.emoji) == react  )
+
+        
+        reaction, user = await bot.wait_for("reaction_add", timeout = None, check = checkEmoji)
+        liste = []
+        if reaction.emoji == react :
+                    
+                
+            async for user in reaction.users():
+                liste.append(user)
+                    
+            personne = liste[1]
+            print(liste)
+
+            await personne.add_roles(role_add)
+
+            liste.pop(1)
+            print(liste)
 
 @bot.command()
 async def syracuse(ctx,nombre : int) :
@@ -2278,19 +1925,6 @@ def random_comp(n=8):
     return liste
 
 
-@bot.command()
-async def get_data(ctx) :
-    res = "```py\n"
-    for k,v in data.items() :
-        res = res + f"""
-{k,v}
-"""
-    res = res + "```"
-
-    embed = Embed(title = "nom et poids des armes" , description = res , color = 0x33CAFF)
-
-    await ctx.send(embed = embed)
-
 
 import youtube_dl
 import asyncio
@@ -2374,24 +2008,26 @@ async def play(ctx, *args):
         a.append(i)
     url = str(a).replace("[","").replace("]","").replace("'","").replace(","," ")
     
-    client = ctx.guild.voice_client
+    try :
+        client = ctx.guild.voice_client
 
-    if client and client.channel:
-        video = Video(url)
-        musics[ctx.guild].append(video)
-        
-    else:
-        await ctx.send("J'arrive, je traite votre demande")
-        channel = ctx.author.voice.channel
-        video = Video(url)
-        musics[ctx.guild] = []
-        client = await channel.connect()
-        play_song(client, musics[ctx.guild], video)  
-        embed_musique = Embed(title = f"Musique" , description = f"je lance la musique : ")
-        embed_musique.url(url=video.url)
-        await ctx.send(embed = embed_musique)
+        if client and client.channel:
+            video = Video(url)
+            musics[ctx.guild].append(video)
             
-
+        else:
+            await ctx.send("J'arrive, je traite votre demande")
+            channel = ctx.author.voice.channel
+            video = Video(url)
+            musics[ctx.guild] = []
+            client = await channel.connect()
+            play_song(client, musics[ctx.guild], video)  
+            embed_musique = Embed(title = f"Musique" , description = f"je lance la musique : ")
+            embed_musique.url(url=video.url)
+            await ctx.send(embed = embed_musique)
+            
+    except :
+        await ctx.send("il y a eu une erreur")
 
 @bot.command()
 async def queue(ctx) :
@@ -2402,75 +2038,11 @@ async def queue(ctx) :
         await ctx.send("il n'y a pas d'autres videos")
     
 
-@bot.command()
-async def help(ctx) :
-
-    message_commande = ctx.message
-
-    membre = ctx.author
-
-    embed_help_1 = Embed(title = "help clem 3eme du nom" , description = f"-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff : affiche votre stuff en emojis ou en image que vous pouvez sauvegarder\n   voici les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" , color=0x33CAFF)
-    embed_help_2 = Embed(title = "help clem 3eme du nom" , description = f"-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil (sans ping) ou celle de vos amis (avec ping)\n \n-> info : montre les informations d'un profil \n \n-> add : ajoute votre code amis \n \n-> code : montre votre code amis (sans ping) ou celui de vos amis (avec ping) \n \n-> delete 'nombre de messages' : (à noter qu'il faur certaines permissions)\n \n-> syracuse 'nombre' : vous renvoi le maximum atteint et le nombre de tours\n \n-> get_data : vous envoi le nom exact des armes nécesaire à la commande match\n \n-> match '8 armes' : renvoi des compositions équitables\n \n-> matchr : renvoi des compositions équitables aléatoire\n \n-> set_role 'nom du role' un emoji quelconque : (nécessite un salon role) permet d'obtenir un role" , color = 0x33CAFF)
-    embed_help_3 = Embed(title = "help clem 3eme du nom" , description = f"->Suite des commandes pour les stuffs :\n  -mes_stuffs : vous montre tous vos stuffs \n  -rename : permet de renomer un stuff\n  -access 'stuff' : vous montre ce stuff\n(je vous conseille de copier coller le nom de la commande mes_stuffs pour éviter les bugs) \n  -suppr 'stuff' : supprime ce stuff\n(même conseil que pour la commande access)\n  \n-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
-
-    embed_help_1.set_footer(text= f"1/3")
-    embed_help_2.set_footer(text= f"2/3")    
-    embed_help_3.set_footer(text= f"3/3")
-
-    async def callback_1(interaction):
-        if interaction.user.id == membre.id:
-            await interaction.message.edit(embed = embed_help_1)
-
-    async def callback_2(interaction):
-        if interaction.user.id == membre.id:
-            await interaction.message.edit(embed = embed_help_2)
-
-    async def callback_3(interaction):
-        if interaction.user.id == membre.id:
-            await interaction.message.edit(embed = embed_help_3)
-
-    async def callback_destroy(interaction):
-        if interaction.user.id == membre.id:
-            await interaction.message.delete()
-            await message_commande.delete()
-
-
-    button_1 = bt.Button(label=1, style=ButtonStyle.green)
-    button_1.callback = callback_1
-
-    button_2 = bt.Button(label=2, style=ButtonStyle.green)
-    button_2.callback = callback_2
-
-    button_3 = bt.Button(label=3, style=ButtonStyle.green)
-    button_3.callback = callback_3
-
-    button_destroy = bt.Button(style=ButtonStyle.danger, emoji="❌")
-    button_destroy.callback = callback_destroy
-
-    view = bt.View()
-    view.add_item(button_1)
-    view.add_item(button_2)
-    view.add_item(button_3)
-    view.add_item(button_destroy)
-
-    await ctx.send(view=view, embed=embed_help_1)
-                    
-print(__file__)
-
-import sys
-
-try:
-    sys.path.append("/python/token")
-    import token_bot
-except:
-    sys.path.append("/home/cleeem/python/token")
-    import token_bot
+                            
 #bot principal
-token_run_main = token_bot.tokens["token_bot_principal"]
+token = "ODQyNDQyODQ3OTgyNDUyODE2.YJ1YCg.n3gvVxfBYc94ilfxMbpSLTleYCk"
 
 #2eme bot
-token1 = token_bot.tokens["token_bot_test"]
+token1 = "ODUwMzI0NDMzNTc1MDg0MDQy.YLoEVw.AGAt3EROOxb9KLqhpVsS7HtVIzA"
 
-#bot.run(token_run_main)
-
-
+bot.run(token)
