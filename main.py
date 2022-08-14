@@ -2456,6 +2456,19 @@ async def help(ctx) :
     await ctx.send(view=view, embed=embed_help_1)
                     
 
+import sys
 
+try:
+    sys.path.append("/python/token")
+    import token_bot
+except:
+    sys.path.append("/home/cleeem/python/token")
+    import token_bot
+#bot principal
+token_run_main = token_bot.tokens["token_bot_principal"]
 
-bot.run(token)
+#2eme bot
+token1 = token_bot.tokens["token_bot_test"]
+
+bot.run(token_run_main)
+
