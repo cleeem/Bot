@@ -2296,110 +2296,169 @@ import youtube_dl
 import asyncio
 from discord import FFmpegPCMAudio
 
-musics = {}
-dico = {}
+from discord import FFmpegPCMAudio
+import youtube_dl
+import asyncio
 ytdl = youtube_dl.YoutubeDL()
 
+class Bot_music:
+    def __init__(self) -> None:
+        self.music_guild = {}
+        self.queue_guild = {}
+        self.current_song = None
+        self.message_embed = None
 
-class Video:
-    def __init__(self, link):
-        video = ytdl.extract_info(link, download=False)
-        video_format = video["formats"][0]
-        self.url = video["webpage_url"]
-        self.stream_url = video_format["url"]
-       
+    async def setup_music(self, ctx, channel_music):
+        channel_music = str(channel_music).replace("<","").replace(">","").replace("#","")
+        addincsv(f"musique/{ctx.guild.id}.csv", channel_music)
+    
+    async def update_embed(self, ctx, message_embed, pause=False):
+        res=""
+        for musique in self.queue_guild[ctx.guild]:
+            res = res + f"\n{musique}"
+        if pause:
+            emote = "⏸"
+        else:
+            emote = "▶"
+        new_embed = Embed(title="Music", description=f"Song State : {emote}\n\nCurrent song : {self.current_song}\n \nQueue : {res}", color=0x33CAFF)
+        
+        async def callback_pause(interaction):
+            if interaction.user.id == ctx.author.id:
+                await self.pause(ctx=ctx)
+
+        async def callback_skip(interaction):
+            if interaction.user.id == ctx.author.id:
+                await self.skip(ctx=ctx)
+
+        button_pause = bt.Button(label="pause/play", style=ButtonStyle.primary, emoji="▶")
+        button_pause.callback = callback_pause
+
+        button_skip = bt.Button(label="skip", style=ButtonStyle.primary, emoji="⏭")
+        button_skip.callback = callback_skip
+
+        view = bt.View()
+        view.add_item(button_pause)
+        view.add_item(button_skip)
+        
+        
+        await message_embed.edit(view=view, embed=new_embed)
+
+    async def resume(self, ctx):
+        client = ctx.guild.voice_client
+        if client.is_paused():
+            client.resume()
+
+    async def pause(self, ctx):
+        client = ctx.guild.voice_client
+        if not client.is_paused():
+            client.pause()
+            await self.update_embed(ctx=ctx, message_embed=self.message_embed, pause=True)
+        
+        else :
+            await self.resume(ctx)
+            await self.update_embed(ctx=ctx, message_embed=self.message_embed, pause=False)
+
+    async def skip(self, ctx):
+        client = ctx.guild.voice_client
+        client.stop()
+        await ctx.send("je change de son")
+
+    async def play_song(self, ctx, url_stream, client_bot, message_embed : Message):
+        try:
+            source = PCMVolumeTransformer(FFmpegPCMAudio(url_stream, before_options = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"))
+
+            def next(_):
+                try :
+                    if len(self.music_guild[ctx.guild]) > 0:
+                        new_song = self.music_guild[ctx.guild][0]
+                        del self.music_guild[ctx.guild][0]
+                        del self.queue_guild[ctx.guild][0]
+                        self.current_song = new_song
+                        self.play_song(ctx, new_song, client_bot=client_bot)
+                    else:
+                        asyncio.run_coroutine_threadsafe(client_bot.disconnect(), bot.loop)
+                except :
+                    pass
+        except:
+            pass
+        
+        client_bot.play(source, after=next)
+        await self.update_embed(ctx=ctx, message_embed=message_embed)
+
+    async def play(self, ctx, url):
+        
+        fichier = reader(open(f"musique/{ctx.guild.id}.csv"))
+        id_channel = None
+        for ligne in fichier :
+            id_channel = str(ligne).replace("[","").replace("]","").replace("'","").replace(","," ")
+
+        channel_embed = bot.get_channel(int(id_channel)) 
+
+        client_bot : VoiceClient = ctx.guild.voice_client
+        
+        if not client_bot == None:
+            video = ytdl.extract_info(url, download=False)
+            url_stream = video["formats"][0]["url"]
+            self.music_guild[ctx.guild].append(url_stream)
+            title_song = video["title"]
+            self.queue_guild[ctx.guild].append(title_song)
+
+            await self.update_embed(ctx=ctx, message_embed=self.message_embed)
+
+        else:
+            if ctx.author.voice == None:
+                await ctx.send("you must be in a voice channel to play music")
+            else:
+                messages = await channel_embed.history(limit=5).flatten()
+    
+                for message in messages:
+                    await message.delete()
+
+                self.music_guild[ctx.guild] = []
+                self.queue_guild[ctx.guild] = []
+                channel_vc = ctx.author.voice.channel
+                await channel_vc.connect()    
+
+                client_bot : VoiceClient = ctx.guild.voice_client
+
+                video = ytdl.extract_info(url, download=False)
+                title_song = video["title"]
+                self.queue_guild[ctx.guild].append(title_song)
+
+                url_stream = video["formats"][0]["url"]
+                a = str(self.queue_guild[ctx.guild]).replace("[","").replace("]","").replace("'","").replace(","," ")
+                message_embed  = Embed(title="Music", description=f"Current song : {title_song}\nQueue : {a}", color=0x33CAFF)
+                self.message_embed = await channel_embed.send(embed=message_embed)
+                self.current_song = title_song
+
+                await self.play_song(ctx, url_stream=url_stream, client_bot=client_bot, message_embed=self.message_embed)
+
+bots_music_dict = {}
 
 @bot.command()
-async def leave(ctx):
-    client = ctx.guild.voice_client
-    await client.disconnect()
-    musics[ctx.guild] = []
+async def play(ctx, url):
+    if bots_music_dict.get(ctx.guild) == None:
+        bot_music = Bot_music()
+        bots_music_dict[ctx.guild] = bot_music
+        await bots_music_dict[ctx.guild].play(ctx=ctx, url=url)
+    else:
+        await bots_music_dict[ctx.guild].play(ctx=ctx, url=url)
 
 @bot.command()
-async def dc(ctx):
-    client = ctx.guild.voice_client
-    await client.disconnect()
-    musics[ctx.guild] = []
-
+async def setup_music(ctx, channel):
+    await bots_music_dict[ctx.guild].setup_music(ctx=ctx, channel_music=channel)
+            
+@bot.command()
+async def pause(ctx):
+    await bots_music_dict[ctx.guild].pause(ctx=ctx)
 
 @bot.command()
 async def resume(ctx):
-    client = ctx.guild.voice_client
-    if client.is_paused():
-        client.resume()
-        await ctx.send("je reprend la lecture")
-
-
-@bot.command()
-async def pause(ctx , url = None):
-    client = ctx.guild.voice_client
-    if not client.is_paused():
-        client.pause()
-        await ctx.send("pause")
-    
-    else :
-        await resume(ctx)
-    
-
+    await bots_music_dict[ctx.guild].resume(ctx=ctx)
 
 @bot.command()
 async def skip(ctx):
-    client = ctx.guild.voice_client
-    client.stop()
-    await ctx.send("je change de son")
-
-
-def play_song(client, queue, song):
-    source = PCMVolumeTransformer(FFmpegPCMAudio(song.stream_url
-        , before_options = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"))
-
-    def next(_):
-        try :
-            if len(queue) > 0:
-                new_song = queue[0]
-                del queue[0]
-                play_song(client, queue, new_song)
-            else:
-                asyncio.run_coroutine_threadsafe(client.disconnect(), bot.loop)
-        except :
-            pass
-
-    client.play(source, after=next)
-
-
-@bot.command()
-async def play(ctx, *args):
-    a=[]
-    for i in args :
-        a.append(i)
-    url = str(a).replace("[","").replace("]","").replace("'","").replace(","," ")
-    
-    client = ctx.guild.voice_client
-
-    if client and client.channel:
-        video = Video(url)
-        musics[ctx.guild].append(video)
-        
-    else:
-        await ctx.send("J'arrive, je traite votre demande")
-        channel = ctx.author.voice.channel
-        video = Video(url)
-        musics[ctx.guild] = []
-        client = await channel.connect()
-        play_song(client, musics[ctx.guild], video)  
-        embed_musique = Embed(title = f"Musique" , description = f"je lance la musique : ")
-        embed_musique.url(url=video.url)
-        await ctx.send(embed = embed_musique)
-            
-
-
-@bot.command()
-async def queue(ctx) :
-    
-    if len(musics[ctx.guild])>=1 :
-        await ctx.send(musics[ctx.guild])
-    else :
-        await ctx.send("il n'y a pas d'autres videos")
+    await bots_music_dict[ctx.guild].skip(ctx=ctx)
     
 
 @bot.command()
