@@ -2435,16 +2435,16 @@ async def help(ctx) :
             await message_commande.delete()
 
 
-    button_1 = bt.Button(label=1, style=ButtonStyle.green)
+    button_1 = bt.Button(label=1, style=ButtonStyle.primary)
     button_1.callback = callback_1
 
-    button_2 = bt.Button(label=2, style=ButtonStyle.green)
+    button_2 = bt.Button(label=2, style=ButtonStyle.primary)
     button_2.callback = callback_2
 
-    button_3 = bt.Button(label=3, style=ButtonStyle.green)
+    button_3 = bt.Button(label=3, style=ButtonStyle.primary)
     button_3.callback = callback_3
 
-    button_destroy = bt.Button(style=ButtonStyle.danger, emoji="❌")
+    button_destroy = bt.Button(style=ButtonStyle.primary, emoji="❌")
     button_destroy.callback = callback_destroy
 
     view = bt.View()
@@ -2455,7 +2455,6 @@ async def help(ctx) :
 
     await ctx.send(view=view, embed=embed_help_1)
                     
-print(__file__)
 
 import sys
 
@@ -2465,12 +2464,13 @@ try:
 except:
     sys.path.append("/home/cleeem/python/token")
     import token_bot
+    
 #bot principal
 token_run_main = token_bot.tokens["token_bot_principal"]
 
 #2eme bot
 token1 = token_bot.tokens["token_bot_test"]
 
-#bot.run(token_run_main)
+bot.run(token_run_main)
 
 
