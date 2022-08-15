@@ -30,235 +30,6 @@ async def on_ready():
     await bot.change_presence(status=Status.online, activity=activity)
 
 
-def addincsv(url_file,objet,newline =True, delimiter =  None):
-    csv = open(url_file,'a',encoding='utf-8')
-    if newline:
-        csv.write((str(objet)+'\n'))
-    else:
-        csv.write(str(objet))
-        csv.write(str(delimiter))
-    csv.close()
-
-
-@bot.command()
-async def register(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    if not exists(f"noms/{id}.csv") :
-        await ctx.send("la suite en dm")
-        await membre.send("IL FAUT QUE CE SOIT VOS IDENTIFIANTS PRONOTE ET NON PAS ENT")
-        def checkMessage(message):
-            return message.author == ctx.message.author and "Direct" in str(message.channel)
-        
-        await membre.send("entrez votre identifiant")
-        
-        ident = await bot.wait_for("message", timeout=60 ,check = checkMessage)
-        ident = ident.content
-        print(ident)
-        addincsv(f"noms/{id}.csv",ident)
-        await membre.send("ok")
-
-
-        await membre.send("entrez votre mot de passe")
-        mdp = await bot.wait_for("message", timeout=60 ,check = checkMessage)
-        mdp = mdp.content
-        print(mdp)
-        addincsv(f"noms/{id}.csv",mdp)
-        await membre.send("ok")
-        
-        #await membre.send("timeout")
-        await membre.send("sauvegarde effectuée")
-
-    else :
-        await ctx.send("already registered")
-
-@bot.command()
-async def devoirs(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    if not exists(f"noms/{id}.csv") :
-        await membre.send("veuillez faire la commande ;register pour pouvoir vous connecter")
-    
-    else :
-        fichier = reader(open(f"noms/{id}.csv"))
-        liste = []
-        for ligne in fichier :
-            liste.append(ligne)
-
-        ident = str(liste[0]).replace("[","").replace("]","").replace("'","")
-        mdp = str(liste[1]).replace("[","").replace("]","").replace("'","")
-
-        client = pronotepy.Client('https://0312696m.index-education.net/pronote/eleve.html?login=true',
-                            username=ident,
-                            password=mdp)
-        res=""
-        if client.logged_in:
-            
-            today = datetime.date.today()
-            homework = client.homework(today) # get list of homework for today and later
-
-            for hw in homework: # iterate through the list
-                res = res + f"\n \n{hw.subject.name} pour le {hw.date}: \n{hw.description}"
-                #print(f"({hw.subject.name}): {hw.description}")
-            
-            await ctx.send("je vous envoie ça en dm")
-            embed = Embed(title = "devoirs", description = res ,color = 0x33CAFF)
-            await membre.send(embed = embed)
-
-        else: 
-            await membre.send("Failed to log in")
-            exit()
-
-
-@bot.command()
-async def notes(ctx):
-    id = ctx.author.id
-    membre = ctx.author
-    liste = []
-    if not exists(f"noms/{id}.csv"):
-        await membre.send("veuillez faire la commande ;register pour pouvoir vous connecter")
-
-    else:
-        fichier = reader(open(f"noms/{id}.csv"))
-        for ligne in fichier:
-            liste.append(ligne)
-
-        ident = str(liste[0]).replace("[", "").replace("]", "").replace("'", "")
-        mdp = str(liste[1]).replace("[", "").replace("]", "").replace("'", "")
-
-        client = pronotepy.Client('https://0312696m.index-education.net/pronote/eleve.html?login=true',
-                                  username=ident,
-                                  password=mdp)
-        res = ""
-        res2 = ""
-        if client.logged_in:
-
-            periods = client.periods
-
-            for period in periods:
-                for grade in period.grades:  # iterate over all the grades
-
-                    if not len(res) >= 4000:
-                        res = res + (f'{grade.grade}/{grade.out_of} le {grade.date} en {grade.subject.name} \n')
-
-                    else:
-
-                        res2 = res2 + (f'{grade.grade}/{grade.out_of} le {grade.date} en {grade.subject.name} \n')
-
-            await ctx.send("je vous envoie ça en dm")
-
-            if res2 != "":
-                embed2 = Embed(title="devoirs", description=res2, color=0x33CAFF)
-                embed = Embed(title="devoirs", description=res, color=0x33CAFF)
-                await membre.send(embed=embed)
-                await membre.send(embed=embed2)
-            else:
-                embed = Embed(title="devoirs", description=res, color=0x33CAFF)
-                await membre.send(embed=embed)
-
-        else:
-            await membre.send("Failed to log in")
-            exit()
-
-
-@bot.command()
-async def mes_notes(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    if not exists(f"noms/{id}.csv"):
-        await membre.send("veuillez faire la commande ;register pour pouvoir vous connecter")
-
-    else:
-        liste = []
-        fichier = reader(open(f"noms/{id}.csv"))
-        for ligne in fichier:
-            liste.append(ligne)
-
-        ident = str(liste[0]).replace("[", "").replace("]", "").replace("'", "")
-        mdp = str(liste[1]).replace("[", "").replace("]", "").replace("'", "")
-
-        client = pronotepy.Client('https://0312696m.index-education.net/pronote/eleve.html?login=true',
-                                  username=ident,
-                                  password=mdp)
-        res = ""
-        res2 = ""
-        dico = {}
-        dico2 = {}
-
-        if client.logged_in:
-            periods = client.periods
-            try :
-                await ctx.send("je prepare tout ca et je vous envoie un mp")
-
-                for period in periods:
-                    for grade in period.grades:
-                        if not grade.subject.name in dico :
-                            dico[grade.subject.name] = [f"{grade.grade}/{grade.out_of} le {grade.date} coeff {grade.coefficient} ({grade.comment})\n"]
-                            if not grade.grade == "Absent" :
-                                a=str(grade.grade).replace(",",".")
-                                a=float(a)
-                                b = str(grade.out_of).replace(",", ".")
-                                b = float(b)
-                                dico2[grade.subject.name] = [a,b]
-
-                        else :
-                            dico[grade.subject.name].append(f"{grade.grade}/{grade.out_of} le {grade.date} coeff {grade.coefficient} ({grade.comment})\n")
-                            if grade.grade != "Absent" and grade.grade != "NonNote":
-                                a = str(grade.grade).replace(",", ".")
-                                a = float(a)    
-
-                                b = str(grade.out_of).replace(",", ".")
-                                b = float(b)
-
-                                dico2[grade.subject.name][0] += a
-                                dico2[grade.subject.name][1] += b
-
-
-
-                for k,v in dico.items() :
-                    res=""
-                    moyenne = dico2[k][0]/dico2[k][1]
-                    moyenne = str(moyenne * 20)
-                    moyenne = moyenne[:5]
-
-                    for note in v :
-                        res = res + note
-
-                    embed = Embed(title=k, description=f"{res} \nvotre moyenne annuelle est {moyenne}" , color=0x33CAFF)
-                    await membre.send(embed = embed)
-            except :
-                await ctx.send("il y a eu une erreur veuillez verifier et/ou changer vos identifiants ($my_id)")
-
-        else:
-            await membre.send("Failed to log in")
-            exit()
-
-@bot.command()
-async def my_id(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    liste = []
-    fichier = reader(open(f"noms/{id}.csv"))
-    for ligne in fichier:
-        liste.append(ligne)
-
-    ident = str(liste[0]).replace("[", "").replace("]", "").replace("'", "")
-    mdp = str(liste[1]).replace("[", "").replace("]", "").replace("'", "")
-
-    embed = Embed(title="Identifiants", description=f"votre identifiant est : {ident}\n votre mot de passe est : {mdp}", color=0x33CAFF)
-    await membre.send(embed = embed)
-
-
-@bot.command()
-async def change(ctx) :
-    id = ctx.author.id
-    membre = ctx.author
-    os.remove(f"noms/{id}.csv")
-    await membre.send("vous allez pouvoir re-entrer vos identifiants")
-    await register(ctx)
-
-
-
 # commande bonjour
 @bot.command()
 async def bonjour(ctx):
@@ -1524,7 +1295,6 @@ async def rename(ctx) :
     nom_stuff = str(nom_stuff).replace(" ","_").replace("+","_")
 
     fichier = reader(open(f"stuffs/{id}/{id}.csv"))
-    print("oui")
     i=0
     for ligne in fichier :
         if str(ligne[0]) == str(nom_stuff) :
@@ -1615,7 +1385,6 @@ async def suppr(ctx,stuff) :
                 res = True
         
         for ligne in fichier :
-            print(ligne)
             await membre.send("Vous avez supprimé votre dernier stuff")
 
         if not res :
@@ -1708,7 +1477,6 @@ async def role(ctx,arg1 : Member , *args) :
         liste.append(i)
 
     removerole =  str(liste).replace("[","").replace("]","").replace("'","").replace(",","")
-    print(removerole)
     for role in liste_roles :
         if role.name == removerole :
             removerole = role
@@ -1729,7 +1497,6 @@ async def unrole(ctx,arg1 : Member , *args) :
         liste.append(i)
 
     removerole =  str(liste).replace("[","").replace("]","").replace("'","").replace(",","")
-    print(removerole)
     for role in liste_roles :
         if role.name == removerole :
             removerole = role
@@ -2203,7 +1970,6 @@ async def mm(ctx,armes : list , dico :dict = data) :
         
         return (armes,equipe1,equipe2)
     else :
-        print("recursivité")
         return await mm(ctx,random_comp())
 
 @bot.command()
