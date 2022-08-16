@@ -9,9 +9,7 @@ from csv import *
 from discord.utils import get
 from csv import *
 import fichier_stuff as fs
-import pronotepy
-import datetime
-import time
+from oui import *
 
 client = Client()
 
@@ -146,6 +144,36 @@ async def on_member_remove(member):
         await channel.send(embed=embed)
     except :
         pass
+
+
+@bot.command()
+async def last(ctx, number=0):
+    config = Config("../token/config.json")
+    splatnet = Splatnet2(config)
+    results = splatnet.results()
+    ilisible = splatnet.result(results.results[int(number)].battle_number)
+    my_team, ennemy_team, game_stats = splatnet.get_results(ilisible)
+
+    res_my_team = ""
+    for mess in my_team:
+        res_my_team = res_my_team + mess
+    embed_my_team = Embed(title="My Team", description=res_my_team, color=0x33CAFF)
+
+    res_ennemy = ""
+    for mess in ennemy_team:
+        res_ennemy = res_ennemy + mess
+    embed_ennemy = Embed(title="Ennemy Team", description=res_ennemy, color=0x33CAFF)
+
+    embed_game = Embed(title="Game Infos", description=game_stats, color=0x33CAFF)
+    await ctx.send(embed=embed_my_team)
+    await ctx.send(embed=embed_ennemy)
+    await ctx.send(embed=embed_game)
+
+
+@bot.command()
+async def stats(ctx, number):
+    await last(ctx, number)
+
 
 # commande bulle
 @bot.command()
