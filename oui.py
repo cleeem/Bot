@@ -171,7 +171,7 @@ class Splatnet2:
                 duree = "3:00"
                 score = f"Score : player's team {result.my_team_percentage}% | {result.other_team_percentage}% ennemy team"
 
-        if result.game_mode.name == "League Battle":
+        elif result.game_mode.name == "League Battle":
             if result.my_team_count > result.other_team_count:
                 win_state = "won"
             else:
