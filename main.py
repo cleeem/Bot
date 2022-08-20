@@ -10,6 +10,8 @@ from discord.utils import get
 from csv import *
 import fichier_stuff as fs
 from oui import *
+import test_schedule as test
+
 
 client = Client()
 
@@ -144,6 +146,32 @@ async def on_member_remove(member):
         await channel.send(embed=embed)
     except :
         pass
+
+
+@bot.command()
+async def rotation(ctx):
+    dico_ordre = {}
+    for key in test.list_mode:
+        data = test.get_data(test.all_data[key])
+        dico = {'fields': [
+            {'inline': True, 'name': 'Maps :', 'value': data.current_maps }, 
+            {'inline': True, 'name': 'Next Maps :', 'value': data.next_maps }, 
+            {'inline': False, 'name': 'Mode :', 'value': data.current_mode},
+            {'inline': False, 'name': 'Next Mode :', 'value': data.next_mode},             
+            ], 'color': 3394303, 'type': 'rich', 'description': f"__Available as from {data.current_start_time[11:16]} to {data.current_end_time[11:16]}__", 'title': data.type}
+        embed = Embed.from_dict(dico)
+        
+        if key == "league":
+            embed.set_thumbnail(url="http://splating.ink/ligue.png")
+        elif key == "gachi":
+            embed.set_thumbnail(url="http://splating.ink/rank.png")
+        elif key == "regular":
+            embed.remove_field(3)
+            embed.set_thumbnail(url="http://splating.ink/turf.png")
+        
+        embed.add_field(name="Additional Informations", value=f"[link to splatoon2.ink](https://splatoon2.ink/)")
+
+        await ctx.send(embed=embed)
 
 
 @bot.command()
