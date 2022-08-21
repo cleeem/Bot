@@ -29,6 +29,19 @@ async def on_ready():
     activity = Game(name=f"!help\nOn {len(bot.guilds)} servers", type=1)
     await bot.change_presence(status=Status.online, activity=activity)
 
+@bot.command()
+async def report(ctx, message):
+
+    clem = bot.get_user(485851523247505409)
+
+    await clem.send(message)
+
+    files = ctx.message.attachments
+    for elt in files:
+        temp : File = await elt.to_file()
+        await clem.send(file=temp)
+
+    
 
 # commande bonjour
 @bot.command()
@@ -188,7 +201,7 @@ async def salmon(ctx):
 async def rotation(ctx):
     dico_ordre = {}
     for key in test.list_mode:
-        data = test.get_data(test.all_data[key])
+        data = test.get_data(test.data_maps[key])
         dico = {'fields': [
             {'inline': True, 'name': 'Maps :', 'value': data.current_maps }, 
             {'inline': True, 'name': 'Next Maps :', 'value': data.next_maps }, 
@@ -611,8 +624,8 @@ async def invit(ctx):
 
 @bot.command()
 async def docu(ctx):
-    embed = Embed(title="documentation",
-                  description=f"voici les sites utilisés pour le bot ainsi que les personnes m'ayant aidées :\n \n inkpedia -> https://splatoonwiki.org/wiki/Main_Page \n \n pour les armes -> https://leanny.github.io/splat2new/database.html \n \n replit et vscode -> pour coder le bot \n \n la documentation de discord.py \n \n cocopw qui m'aide pour le code \n mishy la overtime (RIP) et beacoup d'autres pour les idées \n Bot codé par clem#1777 (discord) @clem_spl (twitter)\n\n\n merci à la region occitanie pour avoir donner le pc portable qui fait uniquemment tourner ce bot 🤡",
+    embed = Embed(title="Documentation",
+                  description=f"voici les sites utilisés pour le bot ainsi que les personnes m'ayant aidées :\n \n inkpedia -> [inkpedia](https://splatoonwiki.org/wiki/Main_Page) \n \n pour les armes -> [site de spike](https://leanny.github.io/splat2new/database.html) \n  \n Pour les informations de splatnet ->  [splatoon.ink](https://splatoon2.ink) \n \n Mon IDE pour coder le bot -> Visual Studio Code \n \n la documentation de discord.py -> [discord.py](https://discordpy.readthedocs.io/en/latest/api.html) \n \n cocopw qui m'a aidé pour le code \n mishy et la overtime (RIP) et beacoup d'autres pour les idées \n Bot codé par clem#1777 (discord) @clem_spl (twitter) \n  \n-> Bot hébergé sur Alwaisdata.net (gratuit)",
                   color=0x33CAFF)
     await ctx.send(embed=embed)
 
@@ -2332,12 +2345,15 @@ async def help(ctx) :
 
     embed_help_1 = Embed(title = "help clem 3eme du nom" , description = f"-> invit : vous donne un lien pour inviter ce bot\n \n-> infoserveur : donne les informations pricipales de ce serveur\n \n-> bulle : fait dire au bot ce que vous voulez\n  \n-> goulag : vous envoi directement au goulag \n \n-> ungoulag : vous sort du goulag\n \n-> hug : faites un calin a la personne de votre choix \n \n-> pat : faites un pat pat a la personne de votre choix \n \n-> spam: commande spéciale (demander a clem#1777)\n \n-> clemw : vous donne une arme au hasard \n   ou vous pouvez choisir parmis :\n   random ; shooter ; roller ; charger\n   slosher ; splatling ; dualies ; brella \n \n-> stuff : affiche votre stuff en emojis ou en image que vous pouvez sauvegarder\n   voici les emojis possibles et leur noms :\n   ssu -> <:ssu:799259849732653096> ; rsu -> <:rsu:799259849044262924> ; scu -> <:scu:799259849446916097> ; spu -> <:spu:799259849665019924>\n   ss -> <:ss:799259849404973077> ; qsj -> <:qsj:799259849442983966> ; qr -> <:Qr:799259849249914901> ; os -> <:os:799259849326067775> \n   mpu -> <:mpu:799259849484402705> ; iss -> <:iss:799259849803825183> ; ism -> <:ism:799259849409298433> ; bdu -> <:bdu:799259849128804353> \n   cbk -> <:Cbk:799259849362767912> ; ir -> <:ir:799259849517957152> ; iru -> <:iru:799259849471819806> ; dr -> <:dr:799259849690054696> \n   lde -> <:lde:799259849359097896> ; sbpu -> <:sbpu:799259849422536754> ; tnty -> <:tnty:799259849501573170> ; hnt -> <:DeathMarking:799259849468805120> \n   ns -> <:ns:799259849857826827> ; thi -> <:thi:799259849799106560> ; rsp -> <:rp:799259849384001546> ; sj -> <:sl:799259849425813535> \n   og -> <:og:799259849786785832> ; ab -> <:ad:852154177869709363> ; uk ou ?-> <:__:852153879650893935>  \n \n-> scrim : sur des maps aléatoires\n   bo3 : vous fait jouer sur les 3 premiers modes <:sz:853656465423990807> ; <:rm:853656465725456424> ; <:tc:853656463846146068>   \n   bo5 : vous fait jouer sur tous les modes et sur une autre zone \n   bo7 vous fait jouer 2 fois sur chaque modes sauf clam \n   bo9 vous fait jouer 2 fois sur chaque modes et une autre dz" , color=0x33CAFF)
     embed_help_2 = Embed(title = "help clem 3eme du nom" , description = f"-> citation : ajoute une citation et la personne qui l'a pronnoncée (sous la forme $citation 'message' membre)\n \n-> anniv : ajoutez votre anniversaire en faisant la commande $anniv 'jour' 'mois' (ATTENTION vous ne pouvez l'éxecuter qu'une seule fois)\n \n-> tableau : vous montre les anniversaires des personnes ayant renseigné leur anniversaire\n \n-> role/unrole : ajoute ou enlève un role ($role @personne 'nom exact du role')\n \n-> voc : vous indique un fichier sur les calls de splatoon2\n \n-> pp : montre votre photo de profil (sans ping) ou celle de vos amis (avec ping)\n \n-> info : montre les informations d'un profil \n \n-> add : ajoute votre code amis \n \n-> code : montre votre code amis (sans ping) ou celui de vos amis (avec ping) \n \n-> delete 'nombre de messages' : (à noter qu'il faur certaines permissions)\n \n-> syracuse 'nombre' : vous renvoi le maximum atteint et le nombre de tours\n \n-> get_data : vous envoi le nom exact des armes nécesaire à la commande match\n \n-> match '8 armes' : renvoi des compositions équitables\n \n-> matchr : renvoi des compositions équitables aléatoire\n \n-> set_role 'nom du role' un emoji quelconque : (nécessite un salon role) permet d'obtenir un role" , color = 0x33CAFF)
-    embed_help_3 = Embed(title = "help clem 3eme du nom" , description = f"->Suite des commandes pour les stuffs :\n  -mes_stuffs : vous montre tous vos stuffs \n  -rename : permet de renomer un stuff\n  -access 'stuff' : vous montre ce stuff\n(je vous conseille de copier coller le nom de la commande mes_stuffs pour éviter les bugs) \n  -suppr 'stuff' : supprime ce stuff\n(même conseil que pour la commande access)\n  \n-> rotation : Vous montre quelles sont les rotations actuelles \n  \n-> salmon : Vous montre la rotation actuelle en Salmon Run \n  \n-> splatnet : Vous montre quels équipements sont disponibles sur l'application \n  \n-> last : Vous envoie toutes les informations de votre dernier match \n  \n-> stats *nombre compris entre 1 et 50* : Vous envoie les stats de la partie en question (1 correspond a la plus récente et 50 la plus ancienne ) \n  \n-> Si vous avez besoin de plus d'aide veuillez contacter clem#1777 sur discord" , color = 0x33CAFF)
+    embed_help_3 = Embed(title = "help clem 3eme du nom" , description = f"->Suite des commandes pour les stuffs :\n  -mes_stuffs : vous montre tous vos stuffs \n  -rename : permet de renomer un stuff\n  -access 'stuff' : vous montre ce stuff\n(je vous conseille de copier coller le nom de la commande mes_stuffs pour éviter les bugs) \n  -suppr 'stuff' : supprime ce stuff\n(même conseil que pour la commande access)\n  \n-> rotation : Vous montre quelles sont les rotations actuelles \n  \n-> salmon : Vous montre la rotation actuelle en Salmon Run \n  \n-> splatnet : Vous montre quels équipements sont disponibles sur l'application \n  \n-> last : Vous envoie toutes les informations de votre dernier match \n  \n-> stats *nombre compris entre 1 et 50* : Vous envoie les stats de la partie en question (1 correspond a la plus récente et 50 la plus ancienne )" , color = 0x33CAFF)
     embed_help_musique = Embed(title="Help Musique", description="-> setup_music *channel* : choississez l'endroit où le bot va indiquer les musiques en cour ou en liste d'attente (à faire une seule fois pour l'instant)\n \n-> play *url* : joue le son ou l'ajoute à la file d'attente \n \n-> pause : pause la musique ou reprend la lecture \n \n-> skip : passe au son suivant", color=0x33CAFF)
+    embed_docu = Embed(title="Documentation",
+                  description=f"voici les sites utilisés pour le bot ainsi que les personnes m'ayant aidées :\n \n inkpedia -> [inkpedia](https://splatoonwiki.org/wiki/Main_Page) \n \n pour les armes -> [site de spike](https://leanny.github.io/splat2new/database.html) \n  \n Pour les informations de splatnet ->  [splatoon.ink](https://splatoon2.ink) \n \n Mon IDE pour coder le bot -> Visual Studio Code \n \n la documentation de discord.py -> [discord.py](https://discordpy.readthedocs.io/en/latest/api.html) \n \n cocopw qui m'a aidé pour le code \n mishy et la overtime (RIP) et beacoup d'autres pour les idées \n Bot codé par clem#1777 (discord) @clem_spl (twitter) \n  \n-> Bot hébergé sur Alwaisdata.net (gratuit)",
+                  color=0x33CAFF)
 
-    embed_help_1.set_footer(text= f"1/3")
-    embed_help_2.set_footer(text= f"2/3")    
-    embed_help_3.set_footer(text= f"3/3")
+    embed_help_1.set_footer(text= f"1/3         Si vous souhaitez me faire parvenir un bug utilisez la commande report *votre problème* (des screens du bug sont suportés)")
+    embed_help_2.set_footer(text= f"2/3         Si vous souhaitez me faire parvenir un bug utilisez la commande report *votre problème* (des screens du bug sont suportés)")    
+    embed_help_3.set_footer(text= f"3/3         Si vous souhaitez me faire parvenir un bug utilisez la commande report *votre problème* (des screens du bug sont suportés)")
 
 
     async def callback_1(interaction):
@@ -2355,6 +2371,10 @@ async def help(ctx) :
     async def callback_music(interaction):
         if interaction.user.id == membre.id:
             await interaction.message.edit(embed = embed_help_musique)
+
+    async def callback_docu(interaction):
+        if interaction.user.id == membre.id:
+            await interaction.message.edit(embed = embed_docu)
 
     async def callback_destroy(interaction):
         if interaction.user.id == membre.id:
@@ -2374,6 +2394,9 @@ async def help(ctx) :
     button_music = bt.Button(style=ButtonStyle.primary, emoji="🎵")
     button_music.callback = callback_music
 
+    button_docu = bt.Button(label="Documentation",style=ButtonStyle.primary)
+    button_docu.callback = callback_docu
+
     button_destroy = bt.Button(style=ButtonStyle.primary, emoji="❌")
     button_destroy.callback = callback_destroy
 
@@ -2383,6 +2406,7 @@ async def help(ctx) :
     view.add_item(button_3)
     view.add_item(button_music)
     view.add_item(button_destroy)
+    view.add_item(button_docu)
 
     await ctx.send(view=view, embed=embed_help_1)
                     
