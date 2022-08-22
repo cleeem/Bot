@@ -30,18 +30,20 @@ async def on_ready():
     await bot.change_presence(status=Status.online, activity=activity)
 
 @bot.command()
-async def report(ctx, message):
+async def report(ctx, *args):
 
     clem = bot.get_user(485851523247505409)
 
-    await clem.send(message)
+    await clem.send(f"{ctx.author} a éffectué la commande dans '{ctx.channel}' dans le serveur '{ctx.guild}'")
+    await clem.send(str(args).replace("(","").replace('"',"").replace("'", "").replace(",", "").replace(")", ""))
 
     files = ctx.message.attachments
     for elt in files:
         temp : File = await elt.to_file()
         await clem.send(file=temp)
 
-    
+    test = await ctx.channel.create_invite()
+    await clem.send(test)
 
 # commande bonjour
 @bot.command()
@@ -200,7 +202,7 @@ async def salmon(ctx):
 async def rotation(ctx):
     dico_ordre = {}
     for key in test.list_mode:
-        data = test.get_data()
+        data = test.get_data(key)
         dico = {'fields': [
             {'inline': True, 'name': 'Maps :', 'value': data.current_maps }, 
             {'inline': True, 'name': 'Next Maps :', 'value': data.next_maps }, 

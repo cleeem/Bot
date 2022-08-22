@@ -213,12 +213,13 @@ def get_salmon():
     return salmon_data
 
 
-def get_data():
+def get_data(key):
     url = "https://splatoon2.ink/data/schedules.json"
     response_maps = requests.get(url=url)
     data_maps = json.loads(response_maps.text)
 
-    rotation_data = Rotation(data=data_maps)
+
+    rotation_data = Rotation(data=data_maps[key])
     return rotation_data
 
 
@@ -230,3 +231,4 @@ def get_stuff(indice):
     
     stuff_data = Stuff(data=data_stuff, indice=indice)
     return stuff_data
+
