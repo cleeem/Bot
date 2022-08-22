@@ -224,6 +224,10 @@ async def rotation(ctx):
         await ctx.send(embed=embed)
 
 
+@bot.comamnd()
+async def map(ctx):
+    await rotation(ctx)
+
 @bot.command()
 async def last(ctx, number=0):
     await ctx.send(f"collecting data, it might take some time")
