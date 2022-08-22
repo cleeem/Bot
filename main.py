@@ -163,8 +163,8 @@ async def on_member_remove(member):
 
 @bot.command()
 async def splatnet(ctx):
-    for i in range(len(test.data_stuff)):
-        data : test.Stuff = test.get_stuff(data=test.data_stuff ,indice=i)
+    for i in range(6):
+        data : test.Stuff = test.get_stuff(indice=i)
         dico = {'fields': [
             {'inline': True, 'name': "New Price", 'value': f"{data.new_price} <:sp_coin:1010654259425062952>"}, 
             {'inline': True, 'name': "New Ability", 'value': data.new_main_emote},
@@ -186,22 +186,21 @@ async def salmon(ctx):
     dico = {'fields': [
             {'inline': True, 'name': 'Maps :', 'value': data.current_map }, 
             {'inline': True, 'name': 'Weapons :', 'value': data.current_weapon_list},
-            {'inline': True, 'name': "Date", 'value': f"{data.current_start_time[11:16]} to {data.current_end_time[11:16]}"},
+            {'inline': True, 'name': "Date", 'value': f"{data.current_start_time} \nto \n{data.current_end_time}"},
             {'inline': False, 'name': "--------------------", 'value': f"Next Rotation \n**--------------------**"},
             {'inline': True, 'name': 'Next Map :', 'value': data.next_map }, 
             {'inline': True, 'name': 'Next Weapons :', 'value': data.next_weapon_list},
-            {'inline': True, 'name': "Date", 'value': f"{data.next_start_time[11:16]} to {data.next_end_time[11:16]}"},
+            {'inline': True, 'name': "Date", 'value': f"{data.next_start_time} \nto \n{data.next_end_time}"},
             ], 'color': 3394303, 'type': 'rich', 'description': "", "title" : "Salmon Run"}
     embed_salmon = Embed.from_dict(dico)
-    
+
     await ctx.send(embed=embed_salmon)
-    
 
 @bot.command()
 async def rotation(ctx):
     dico_ordre = {}
     for key in test.list_mode:
-        data = test.get_data(test.data_maps[key])
+        data = test.get_data()
         dico = {'fields': [
             {'inline': True, 'name': 'Maps :', 'value': data.current_maps }, 
             {'inline': True, 'name': 'Next Maps :', 'value': data.next_maps }, 

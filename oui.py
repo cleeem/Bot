@@ -48,7 +48,7 @@ dico_spe = {
     "Burst-Bomb Laucher" : "<:burst:1009101252287811594> ",
     "Curling-Bomb Launcher" : "<:curling:1009101190925144105>",
     "Splat-Bomb Launcher" : "<:splat:1009101120955760740>",
-    "Suction-Bomb Laucher" : "<:suction:1009101054207594556>",
+    "Suction-Bomb Launcher" : "<:suction:1009101054207594556>",
     "Ink Storm" : "<:storm:1009101099489312860>",
     "Baller" : "<:baller:1009101289390604298>",
     "Bubble Blower" : "<:bubble:1009101278124711986>",
