@@ -224,7 +224,7 @@ async def rotation(ctx):
         await ctx.send(embed=embed)
 
 
-@bot.comamnd()
+@bot.command()
 async def map(ctx):
     await rotation(ctx)
 
