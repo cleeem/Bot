@@ -224,42 +224,42 @@ async def rotation(ctx):
         await ctx.send(embed=embed)
 
 
-@bot.command()
-async def map(ctx):
-    await rotation(ctx)
+# @bot.command()
+# async def map(ctx):
+#     await rotation(ctx)
 
-@bot.command()
-async def last(ctx, number=0):
-    await ctx.send(f"collecting data, it might take some time")
+# @bot.command()
+# async def last(ctx, number=0):
+#     await ctx.send(f"collecting data, it might take some time")
 
-    config = Config("../token/config.json")
-    splatnet = Splatnet2(config)
-    results = splatnet.results()
-    ilisible = splatnet.result(results.results[int(number)].battle_number)
-    my_team, ennemy_team, game_stats = splatnet.get_results(ilisible)
+#     config = Config("../token/config.json")
+#     splatnet = Splatnet2(config)
+#     results = splatnet.results()
+#     ilisible = splatnet.result(results.results[int(number)].battle_number)
+#     my_team, ennemy_team, game_stats = splatnet.get_results(ilisible)
 
-    res_my_team = ""
-    for mess in my_team:
-        res_my_team = res_my_team + mess
-    embed_my_team = Embed(title="My Team", description=res_my_team, color=0x33CAFF)
+#     res_my_team = ""
+#     for mess in my_team:
+#         res_my_team = res_my_team + mess
+#     embed_my_team = Embed(title="My Team", description=res_my_team, color=0x33CAFF)
 
-    res_ennemy = ""
-    for mess in ennemy_team:
-        res_ennemy = res_ennemy + mess
-    embed_ennemy = Embed(title="Ennemy Team", description=res_ennemy, color=0x33CAFF)
+#     res_ennemy = ""
+#     for mess in ennemy_team:
+#         res_ennemy = res_ennemy + mess
+#     embed_ennemy = Embed(title="Ennemy Team", description=res_ennemy, color=0x33CAFF)
 
-    embed_game = Embed(title="Game Infos", description=game_stats, color=0x33CAFF)
-    await ctx.send(embed=embed_my_team)
-    await ctx.send(embed=embed_ennemy)
-    await ctx.send(embed=embed_game)
+#     embed_game = Embed(title="Game Infos", description=game_stats, color=0x33CAFF)
+#     await ctx.send(embed=embed_my_team)
+#     await ctx.send(embed=embed_ennemy)
+#     await ctx.send(embed=embed_game)
 
 
-@bot.command()
-async def stats(ctx, number):
-    if 1<=number<=50 :
-        await last(ctx, number-1)
-    else:
-        await ctx.send("le numéro de la partie doit être compris en 1 et 50")
+# @bot.command()
+# async def stats(ctx, number):
+#     if 1<=number<=50 :
+#         await last(ctx, number-1)
+#     else:
+#         await ctx.send("le numéro de la partie doit être compris en 1 et 50")
 
 # commande bulle
 @bot.command()
