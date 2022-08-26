@@ -26,7 +26,7 @@ bot.remove_command('help')
 @bot.event
 async def on_ready():
     print("Ready !")
-    activity = Game(name=f"!help\nOn {len(bot.guilds)} servers", type=1)
+    activity = Game(name=f"$help\nOn {len(bot.guilds)} servers", type=1)
     await bot.change_presence(status=Status.online, activity=activity)
 
 @bot.command()
@@ -224,9 +224,9 @@ async def rotation(ctx):
         await ctx.send(embed=embed)
 
 
-# @bot.command()
-# async def map(ctx):
-#     await rotation(ctx)
+@bot.command()
+async def map(ctx):
+    await rotation(ctx)
 
 # @bot.command()
 # async def last(ctx, number=0):
@@ -1652,14 +1652,12 @@ def suprligne(url, n):
 @bot.command() # context is automatically passed in rewrite
 async def info(ctx , membre : Member = None):
     if membre == None :
-        pp = f"{str(ctx.author.avatar_url)[:-4]}128"
         nom = ctx.author.name
         ping = ctx.author.mention
         ID = ctx.author.id
         crea = ctx.author.created_at
 
     else :
-        pp = f"{str(membre.avatar_url)[:-4]}128"
         nom = membre.name
         ping = membre.mention
         ID = membre.id
@@ -1667,14 +1665,13 @@ async def info(ctx , membre : Member = None):
 
     embed = Embed(description = f"voici les informations sur {ping} : \n" , color = 0x33CAFF)
 
-    embed.set_author(name=nom , icon_url = pp)
+    embed.set_author(name=nom )
 
     embed.add_field(name="ID", value=ID, inline=False)
 
     embed.add_field(name="date de création du compte", value=crea, inline=False)
 
     embed.add_field(name=f"photo de profil", value=f"voici la photo de profil de {nom}", inline=True)
-    embed.set_image(url = pp )
 
     embed.set_footer(text = f"Informations demandées par {ctx.author.name}")
 
@@ -2189,6 +2186,9 @@ class Bot_music:
         self.message_embed = None
 
     async def setup_music(self, ctx, channel_music):
+        with open(f"stuffs/{id}/{id}","wb") as csvfile:
+            filewriter = writer(csvfile, delimiter=',', quotechar='|', quoting=QUOTE_MINIMAL)
+
         channel_music = str(channel_music).replace("<","").replace(">","").replace("#","")
         addincsv(f"musique/{ctx.guild.id}.csv", channel_music)
     
@@ -2289,7 +2289,7 @@ class Bot_music:
             if ctx.author.voice == None:
                 await ctx.send("you must be in a voice channel to play music")
             else:
-                messages = await channel_embed.history(limit=5).flatten()
+                messages = await channel_embed.history(limit=50).flatten()
     
                 for message in messages:
                     await message.delete()
