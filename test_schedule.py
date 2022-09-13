@@ -84,7 +84,7 @@ dico_stuff = {
     "Quick Super Jump" : "<:qsj:1009070688256151624>",
     "Comeback" : "<:cbk:1009070396429062195>",
     "Ink Resistance Up" : "<:ir:1009070848931532881>",
-    "Bomb Defense Up DX" : "<:bdu:1009070315814518816>",
+    "Sub Resistance Up" : "<:sru:1019332176782839868>",
     "Respawn Punisher" : "<:rsp:1009070563580452914>",
     "question mark" : "<:uk:1009071227043852310>",
     "uk" : "<:uk:1009071227043852310>",
@@ -100,10 +100,11 @@ dico_stuff = {
     "Opening Gambit" : "<:og:1009071094352838727>",
     "Haunt" : "<:hnt:1009070429064941628>",
     "Sub Power Up" : "<:sbpu:1009070353810735196>",
+    "Intensify Action" : "<:ia:1019332137687724032>",
 }
 
 
-list_mode = ["regular", "gachi", "league"]
+list_mode = ["regularSchedules", "xSchedules", "bankaraSchedules"]
 
 url_assets = "https://splatoon2.ink/assets/splatnet/"
 
@@ -152,25 +153,43 @@ class Salmon:
 
 class Rotation:
     def __init__(self, data) -> None:
-        self.type = data[0]["game_mode"]["name"]
 
-        current_stage_a = data[0]["stage_a"]["name"]
-        current_stage_b = data[0]["stage_b"]["name"]
-        self.current_maps = f"{current_stage_a} \n{current_stage_b}"
-        self.current_mode = data[0]["rule"]["name"] + " " + dico_emote[data[0]["rule"]["name"]]
-        self.current_start_time = time.ctime(int(data[0]["start_time"]))
-        self.current_end_time = time.ctime(int(data[0]["end_time"]))
+        for k in data.keys():
 
-        next_stage_a = data[1]["stage_a"]["name"]
-        next_stage_b = data[1]["stage_b"]["name"]
-        self.next_maps = f"{next_stage_a} \n{next_stage_b}"
-        self.next_mode = data[1]["rule"]["name"] + " " + dico_emote[data[1]["rule"]["name"]]
-        self.next_start_time = time.ctime(int(data[1]["start_time"]))
-        self.next_end_time = time.ctime(int(data[1]["end_time"]))
+            if "regular" in k:
+                settings = "regularMatchSetting"
+            elif "bankara" in k:
+                settings = "bankaraMatchSettings"
+                data
+            elif "x" in k:
+                settings = "xMatchSetting"
+
+        if settings == "bankaraMatchSettings":
+            self.type = "Anarchy Battle Open"
+
+            current_stage_a = data[settings][0]["vsStages"][0]["name"]
+            current_stage_b = data[settings][0]["vsStages"][1]["name"]
+            self.current_maps = f"{current_stage_a} \n{current_stage_b}"
+            self.current_mode = data[settings][1]["vsRule"]["name"] #+ " " + dico_emote[data["vsRule"]["name"]]
+            self.current_start_time =data["startTime"][11:19]
+            self.current_end_time = data["endTime"][11:19]
+            
+        else:
+            if "Turf" in data[settings]["vsRule"]["name"]:
+                self.type = data[settings]["vsRule"]["name"]
+            else:
+                self.type = "Anarchy Battle Series"
+
+            current_stage_a = data[settings]["vsStages"][0]["name"]
+            current_stage_b = data[settings]["vsStages"][1]["name"]
+            self.current_maps = f"{current_stage_a} \n{current_stage_b}"
+            self.current_mode = data[settings]["vsRule"]["name"] #+ " " + dico_emote[data["vsRule"]["name"]]
+            self.current_start_time =data["startTime"][11:19]
+            self.current_end_time = data["endTime"][11:19]
 
 
     def __str__(self) -> str:
-        return f"Current Rotation : \nMaps : {self.current_maps} \nMode : {self.current_mode}\n{self.current_start_time} to {self.current_end_time} \n\nNext Rotation : \nMaps : {self.next_maps} \nMode : {self.next_mode}\n{self.next_start_time} {self.next_end_time}"
+        return f"Current Rotation : \nMaps : {self.current_maps} \nMode : {self.current_mode}\n {self.type}\n{self.current_start_time} to {self.current_end_time}"
 
 
 class Stuff:
@@ -178,15 +197,12 @@ class Stuff:
         self.name_stuff = data[indice]["gear"]["name"]
         self.brand = data[indice]["gear"]["brand"]["name"]
         self.new_price = data[indice]["price"]
-        self.old_price = data[indice]["original_gear"]["price"]
         
-        self.new_main = data[indice]["skill"]["name"]
+        self.new_main = data[indice]["gear"]["primaryGearPower"]["name"]
         self.new_main_emote = dico_stuff[self.new_main]
-        self.old_main = data[indice]["original_gear"]["skill"]["name"]
-        self.old_main_emote = dico_stuff[self.old_main]
 
-        self.gear_url = url_assets + data[indice]["gear"]["image"]
-        self.end_time = time.ctime(int(data[indice]["end_time"]))
+        self.gear_url = data[indice]["gear"]["image"]["url"]
+        self.end_time = data[indice]["saleEndTime"]
         try:
             self.frequent_bonus = data[indice]["gear"]["brand"]["frequent_skill"]["name"]
             self.frequent_bonus_emote = dico_stuff[self.frequent_bonus]
@@ -195,7 +211,7 @@ class Stuff:
             self.frequent_bonus = "None"            
     
     def __str__(self) -> str:
-        return f"{self.gear_url} {self.brand} jusqu'au {self.end_time} \nold : {self.old_main} {self.old_price} \nnew : {self.new_main} {self.new_price} "
+        return f"{self.gear_url} \n{self.brand} jusqu'au \n{self.end_time} \n\nnew : {self.new_main} {self.new_price} "
 
 
 
@@ -214,21 +230,26 @@ def get_salmon():
 
 
 def get_data(key):
-    url = "https://splatoon2.ink/data/schedules.json"
+    url = "https://splatoon3.ink/data/schedules.json"
     response_maps = requests.get(url=url)
     data_maps = json.loads(response_maps.text)
 
+    data = data_maps["data"]
 
-    rotation_data = Rotation(data=data_maps[key])
-    return rotation_data
+    liste_rota = []
 
+    for elt in data[key]["nodes"][0:2]:
+        rotation_data = Rotation(data=elt)  
+        liste_rota.append(rotation_data)
+
+    return liste_rota
+    
 
 def get_stuff(indice):
-    url_stuff = "https://splatoon2.ink/data/merchandises.json"
+    url_stuff = "https://splatoon3.ink/data/gear.json"
     response_stuff = requests.get(url=url_stuff)
     data_stuff = json.loads(response_stuff.text)
-    data_stuff = data_stuff["merchandises"]
-    
+    data_stuff = data_stuff["data"]["gesotown"]["limitedGears"]
+
     stuff_data = Stuff(data=data_stuff, indice=indice)
     return stuff_data
-

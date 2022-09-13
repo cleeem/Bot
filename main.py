@@ -170,10 +170,8 @@ async def splatnet(ctx):
         dico = {'fields': [
             {'inline': True, 'name': "New Price", 'value': f"{data.new_price} <:sp_coin:1010654259425062952>"}, 
             {'inline': True, 'name': "New Ability", 'value': data.new_main_emote},
+            
             {'inline': True, 'name': "Brand", 'value': data.brand},
-
-            {'inline': True, 'name': "Old Price", 'value': f"{data.old_price} <:sp_coin:1010654259425062952>"}, 
-            {'inline': True, 'name': "old Ability", 'value': data.old_main_emote},
             {'inline': True, 'name': "Frequent Bonus", 'value': f"{data.frequent_bonus} {data.frequent_bonus_emote}"},
             
             ], 'color': 3394303, 'type': 'rich', 'description': f"Available until {data.end_time}", "title" : data.name_stuff}
@@ -200,24 +198,24 @@ async def salmon(ctx):
 
 @bot.command()
 async def rotation(ctx):
-    dico_ordre = {}
     for key in test.list_mode:
-        data = test.get_data(key)
+        liste_rota = test.get_data(key)
+        data1 = liste_rota[0]
+        data2 = liste_rota[1]
         dico = {'fields': [
-            {'inline': True, 'name': 'Maps :', 'value': data.current_maps }, 
-            {'inline': True, 'name': 'Next Maps :', 'value': data.next_maps }, 
-            {'inline': False, 'name': 'Mode :', 'value': data.current_mode},
-            {'inline': False, 'name': 'Next Mode :', 'value': data.next_mode},             
-            ], 'color': 3394303, 'type': 'rich', 'description': f"__Available as from {data.current_start_time[11:16]} to {data.current_end_time[11:16]}__", 'title': data.type}
+            {'inline': True, 'name': 'Maps :', 'value': data1.current_maps }, 
+            {'inline': True, 'name': 'Next Maps :', 'value': data2.current_maps }, 
+            {'inline': False, 'name': 'Mode :', 'value': data1.current_mode},
+            {'inline': False, 'name': 'Next Mode :', 'value': data2.current_mode},             
+            ], 'color': 3394303, 'type': 'rich', 'description': f"__Available as from {data1.current_start_time} to {data1.current_end_time}__", 'title': data1.type}
         embed = Embed.from_dict(dico)
         
-        if key == "league":
-            embed.set_thumbnail(url="http://splating.ink/ligue.png")
-        elif key == "gachi":
-            embed.set_thumbnail(url="http://splating.ink/rank.png")
-        elif key == "regular":
-            embed.remove_field(3)
+        if key == "regularSchedules":
             embed.set_thumbnail(url="http://splating.ink/turf.png")
+        elif key == "xSchedules":
+            embed.set_thumbnail(url="http://splating.ink/rank.png")
+        elif key == "bankaraSchedules":
+            embed.set_thumbnail(url="http://splating.ink/rank.png")
         
         embed.add_field(name="Additional Informations", value=f"[link to splatoon2.ink](https://splatoon2.ink/)")
 
@@ -2419,7 +2417,7 @@ async def help(ctx) :
 import sys
 
 try:
-    sys.path.append("/python/token")
+    sys.path.append("../token")
     import token_bot
 except:
     sys.path.append("/home/cleeem/python/token")
